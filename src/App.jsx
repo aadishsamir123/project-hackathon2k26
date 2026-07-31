@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { onAuthChange } from './services/auth.js';
-import { syncUserProfile } from './services/firestore.js';
+import { syncUserProfile, checkTutorialStatus, completeTutorialFlag } from './services/firestore.js';
 
 // Layout & Common Components
 import Navbar from './components/layout/Navbar.jsx';
@@ -9,6 +9,7 @@ import CrisisBanner from './components/common/CrisisBanner.jsx';
 import HelpModal from './components/common/HelpModal.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import AmbientSoundPlayer from './components/common/AmbientSoundPlayer.jsx';
+import OnboardingTutorialModal from './components/common/OnboardingTutorialModal.jsx';
 
 // MindHaven Pages
 import Dashboard from './pages/Dashboard.jsx';
@@ -24,6 +25,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [authTab, setAuthTab] = useState('signin');
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showCrisisBanner, setShowCrisisBanner] = useState(true);
@@ -36,16 +38,28 @@ export default function App() {
         setUser(firebaseUser);
         try {
           await syncUserProfile(firebaseUser);
+          const hasCompleted = await checkTutorialStatus(firebaseUser.uid);
+          if (!hasCompleted) {
+            setIsTutorialOpen(true);
+          }
         } catch (err) {
           console.warn('Profile sync warning:', err);
         }
       } else {
         setUser(null);
+        setIsTutorialOpen(false);
       }
       setAuthLoading(false);
     });
     return unsubscribe;
   }, []);
+
+  const handleCompleteTutorial = async () => {
+    setIsTutorialOpen(false);
+    if (user?.uid) {
+      await completeTutorialFlag(user.uid);
+    }
+  };
 
   // Handle Dark mode toggle class on documentElement
   useEffect(() => {
@@ -154,6 +168,13 @@ export default function App() {
           element={<Navigate to={user ? "/dashboard/myspace/homehub" : "/login"} replace />}
         />
       </Routes>
+
+      {/* Interactive Onboarding Tutorial Modal */}
+      <OnboardingTutorialModal
+        isOpen={isTutorialOpen}
+        onClose={handleCompleteTutorial}
+        onComplete={handleCompleteTutorial}
+      />
 
       {/* Help Modal */}
       <HelpModal

@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   addDoc,
   getDocs,
   onSnapshot,
@@ -40,6 +41,39 @@ export async function syncUserProfile(user) {
     );
   } catch (err) {
     console.warn("Profile sync fallback to offline mode:", err);
+  }
+}
+
+export async function checkTutorialStatus(uid) {
+  if (!uid) return true;
+  const localVal = localStorage.getItem("mindhaven_tutorial_completed_" + uid);
+  if (localVal === "true") return true;
+
+  if (db) {
+    try {
+      const ref = doc(db, "users", uid, "profile", "data");
+      const snap = await getDoc(ref);
+      if (snap.exists() && snap.data()?.hasCompletedTutorial) {
+        localStorage.setItem("mindhaven_tutorial_completed_" + uid, "true");
+        return true;
+      }
+    } catch (err) {
+      console.warn("Tutorial status fetch fallback:", err);
+    }
+  }
+  return false;
+}
+
+export async function completeTutorialFlag(uid) {
+  if (!uid) return;
+  localStorage.setItem("mindhaven_tutorial_completed_" + uid, "true");
+  if (db) {
+    try {
+      const ref = doc(db, "users", uid, "profile", "data");
+      await setDoc(ref, { hasCompletedTutorial: true }, { merge: true });
+    } catch (err) {
+      console.warn("Complete tutorial flag sync error:", err);
+    }
   }
 }
 
