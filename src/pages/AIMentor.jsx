@@ -238,7 +238,7 @@ export default function AIMentor({ onOpenResources }) {
                           <span>Immediate Crisis Helplines Available</span>
                         </div>
                         <p className="text-[11px]">
-                          Please remember that you can call or text <strong>988 Suicide & Crisis Lifeline</strong> or <strong>1767 SOS</strong> right now for free, confidential 24/7 care.
+                          Please remember that you can call or text <strong>1767 SOS</strong> right now for free, confidential 24/7 care.
                         </p>
                         <button
                           onClick={onOpenResources}

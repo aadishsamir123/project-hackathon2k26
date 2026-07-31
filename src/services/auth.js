@@ -53,3 +53,12 @@ export async function logOut() {
 export function onAuthChange(callback) {
   return onAuthStateChanged(auth, callback);
 }
+
+export async function updateUserName(user, displayName) {
+  try {
+    await updateProfile(user, { displayName });
+    return { error: null };
+  } catch (err) {
+    return { error: err.message };
+  }
+}

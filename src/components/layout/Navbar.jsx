@@ -160,11 +160,24 @@ export default function Navbar({
 
             {/* User Profile display */}
             {user ? (
-              <div className="flex items-center space-x-2 pl-1">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center justify-center font-bold text-xs">
-                  {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'S'}
-                </div>
-              </div>
+              <button
+                onClick={() => onNavigate('profile')}
+                className="flex items-center space-x-2 pl-1 cursor-pointer hover:opacity-90 focus:outline-none transition-all"
+                title="View Profile & Statistics"
+              >
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt="User Profile"
+                    className="w-9 h-9 rounded-xl object-cover border border-emerald-300 dark:border-emerald-750 shadow-xs"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center justify-center font-bold text-xs">
+                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'S'}
+                  </div>
+                )}
+              </button>
             ) : (
               <button
                 onClick={() => onOpenAuth('signin')}

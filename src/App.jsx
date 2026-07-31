@@ -15,6 +15,7 @@ import AnonymousHelpWall from './pages/AnonymousHelpWall.jsx';
 import AIMentor from './pages/AIMentor.jsx';
 import SerenityCorner from './pages/SerenityCorner.jsx';
 import CrisisResources from './pages/CrisisResources.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -89,6 +90,8 @@ export default function App() {
         return <SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />;
       case 'resources':
         return <CrisisResources />;
+      case 'profile':
+        return <ProfilePage user={user} />;
       default:
         return <Dashboard user={user} onNavigate={setActivePage} onOpenHelp={() => setIsHelpOpen(true)} />;
     }
