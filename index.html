@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hackathon 2K26 Project -- Ctrl Alt Elite</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #000000;
+        margin: 0;
+        padding: 0;
+      }
+      .title {
+        color: #fff;
+        text-align: center;
+      }
+      .description {
+        color: #ddd;
+        text-align: center;
+      }
+      .surprise-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .surprise-text {
+        color: #ff0000;
+        text-align: center;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title">Hackathon 2K26 Project -- Ctrl Alt Elite</h1>
+    <p class="description">
+      I will start to do work on this when Hackathon starts.
+    </p>
+    <button class="surprise-button" id="surprise-button">
+      Click me for surprise
+    </button>
+    <p style="display: none" id="surprise-text" class="surprise-text">
+      surprise
+    </p>
+    <script>
+      document
+        .querySelector("#surprise-button")
+        .addEventListener("click", function () {
+          document.querySelector("#surprise-text").style.display = "block";
+          setTimeout(() => {
+            document.querySelector("#surprise-text").style.display = "none";
+          }, 1000);
+        });
+    </script>
+  </body>
+</html>
