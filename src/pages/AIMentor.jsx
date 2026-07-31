@@ -48,8 +48,12 @@ export default function AIMentor({ onOpenResources }) {
     { num: 1, sense: 'TASTE 👅', prompt: 'Notice your mouth. Name 1 thing you can taste (mint, water, food), or take a slow sip of water.', color: 'border-teal-500 bg-teal-50 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200' },
   ];
 
+  const messagesContainerRef = useRef(null);
+
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [chatMessages, isTyping]);
 
   const handleSendMessage = async (e) => {
@@ -202,7 +206,7 @@ export default function AIMentor({ onOpenResources }) {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
+          <div ref={messagesContainerRef} className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
             {chatMessages.map((msg, idx) => {
               const isAi = msg.sender === 'ai';
               return (

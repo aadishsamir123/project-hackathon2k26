@@ -166,22 +166,34 @@ export default function CrisisResources() {
             </div>
           </div>
 
-          <ol className="space-y-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
-            <li className="flex items-start space-x-2">
+          <ol className="space-y-3 text-xs text-slate-700 dark:text-slate-300 font-medium">
+            <li className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-start space-x-3">
               <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</span>
-              <span><strong>Identify Warning Signs:</strong> Recognize triggers (racing heart, insomnia, isolating in room).</span>
+              <div>
+                <strong className="text-slate-800 dark:text-slate-100 block">Identify Warning Signs</strong>
+                <p className="text-slate-600 dark:text-slate-300 mt-0.5">Recognize triggers (racing heart, insomnia, isolating in room).</p>
+              </div>
             </li>
-            <li className="flex items-start space-x-2">
+            <li className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-start space-x-3">
               <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</span>
-              <span><strong>Internal Coping:</strong> Practice 4-7-8 breathing or listen to rain soundscapes in Serenity Corner.</span>
+              <div>
+                <strong className="text-slate-800 dark:text-slate-100 block">Internal Coping</strong>
+                <p className="text-slate-600 dark:text-slate-300 mt-0.5">Practice 4-7-8 breathing or listen to rain soundscapes in Serenity Corner.</p>
+              </div>
             </li>
-            <li className="flex items-start space-x-2">
+            <li className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-start space-x-3">
               <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</span>
-              <span><strong>Reach Out to Friends:</strong> Message a trusted roommate, classmate, or post on Peer Haven.</span>
+              <div>
+                <strong className="text-slate-800 dark:text-slate-100 block">Reach Out to Friends</strong>
+                <p className="text-slate-600 dark:text-slate-300 mt-0.5">Message a trusted roommate, classmate, or post on Peer Haven.</p>
+              </div>
             </li>
-            <li className="flex items-start space-x-2">
+            <li className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-start space-x-3">
               <span className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</span>
-              <span><strong>Call Professional Crisis Lines:</strong> Dial 988 or 1767 for immediate expert help.</span>
+              <div>
+                <strong className="text-slate-800 dark:text-slate-100 block">Call Professional Crisis Lines</strong>
+                <p className="text-slate-600 dark:text-slate-300 mt-0.5">Dial 988 or 1767 for immediate expert help.</p>
+              </div>
             </li>
           </ol>
         </div>

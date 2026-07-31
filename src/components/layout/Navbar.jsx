@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Heart,
   MessageSquareHeart,
@@ -13,42 +14,40 @@ import {
 } from 'lucide-react';
 
 export default function Navbar({
-  activePage,
-  onNavigate,
   isAudioPlaying,
   onToggleAudio,
   isDarkMode,
   onToggleDarkMode,
-  user,
-  onOpenAuth,
-  onOpenCrisis
+  user
 }) {
   const [openDropdown, setOpenDropdown] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // Categorized Navigation Items
+  // Categorized Navigation Items with exact URLs
   const categories = [
     {
       id: 'myspace',
       name: "My Space",
       items: [
-        { id: 'dashboard', label: 'Home Hub', desc: 'Emotion summary & happiness jar', icon: Heart },
-        { id: 'mood-tracker', label: 'Emotion Log', desc: 'Private mental health journal', icon: Sparkles }
+        { id: 'homehub', path: '/dashboard/myspace/homehub', label: 'Home Hub', desc: 'Emotion summary & happiness jar', icon: Heart },
+        { id: 'emotionlog', path: '/dashboard/myspace/emotionlog', label: 'Emotion Log', desc: 'Private mental health journal', icon: Sparkles }
       ]
     },
     {
       id: 'calm',
       name: "Calm & AI",
       items: [
-        { id: 'serenity-corner', label: 'Breathing & Calm', desc: 'Breathing cycles & soundscapes', icon: Wind },
-        { id: 'ai-mentor', label: 'MindPal AI', desc: 'Empathetic listener & CBT reframe', icon: Compass }
+        { id: 'serenity', path: '/dashboard/calmandai/serenity', label: 'Breathing & Calm', desc: 'Breathing cycles & soundscapes', icon: Wind },
+        { id: 'mindpal', path: '/dashboard/calmandai/mindpal', label: 'MindPal AI', desc: 'Empathetic listener & CBT reframe', icon: Compass }
       ]
     },
     {
       id: 'connect',
       name: "Support & Connect",
       items: [
-        { id: 'anon-wall', label: 'Peer Haven', desc: 'Anonymous advice & support wall', icon: MessageSquareHeart },
-        { id: 'resources', label: 'Help & Crisis', desc: '24/7 emergency support services', icon: PhoneCall }
+        { id: 'peerhaven', path: '/dashboard/connect/peerhaven', label: 'Peer Haven', desc: 'Anonymous advice & support wall', icon: MessageSquareHeart },
+        { id: 'resources', path: '/dashboard/connect/resources', label: 'Help & Crisis', desc: '24/7 emergency support services', icon: PhoneCall }
       ]
     }
   ];
@@ -64,7 +63,7 @@ export default function Navbar({
           
           {/* Logo & Platform Name */}
           <div
-            onClick={() => onNavigate('dashboard')}
+            onClick={() => navigate('/dashboard/myspace/homehub')}
             className="flex items-center space-x-3 cursor-pointer group shrink-0"
           >
             <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-300">
@@ -83,7 +82,7 @@ export default function Navbar({
           {/* Desktop Navigation Links with dropdowns */}
           <nav className="hidden md:flex items-center space-x-6">
             {categories.map((cat) => {
-              const isAnyActive = cat.items.some(item => activePage === item.id);
+              const isAnyActive = cat.items.some(item => location.pathname === item.path);
               return (
                 <div
                   key={cat.id}
@@ -112,12 +111,12 @@ export default function Navbar({
                       <div className="space-y-1">
                         {cat.items.map((item) => {
                           const Icon = item.icon;
-                          const isActive = activePage === item.id;
+                          const isActive = location.pathname === item.path;
                           return (
                             <button
                               key={item.id}
                               onClick={() => {
-                                onNavigate(item.id);
+                                navigate(item.path);
                                 setOpenDropdown(null);
                               }}
                               className={`w-full flex items-start space-x-3 p-2.5 rounded-xl text-left transition-all ${
@@ -164,8 +163,10 @@ export default function Navbar({
             {/* User Profile display */}
             {user ? (
               <button
-                onClick={() => onNavigate('profile')}
-                className="flex items-center space-x-2 pl-1 cursor-pointer hover:opacity-90 focus:outline-none transition-all"
+                onClick={() => navigate('/dashboard/profile/me')}
+                className={`flex items-center space-x-2 pl-1 cursor-pointer hover:opacity-90 focus:outline-none transition-all rounded-xl ${
+                  location.pathname === '/dashboard/profile/me' ? 'ring-2 ring-emerald-500' : ''
+                }`}
                 title="View Profile & Statistics"
               >
                 {user.photoURL ? (
@@ -183,7 +184,7 @@ export default function Navbar({
               </button>
             ) : (
               <button
-                onClick={() => onOpenAuth('signin')}
+                onClick={() => navigate('/login')}
                 className="flex items-center space-x-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-xs"
               >
                 <LogIn className="w-3.5 h-3.5" />
@@ -197,11 +198,11 @@ export default function Navbar({
         <div className="md:hidden flex items-center justify-around py-3 border-t border-slate-100 dark:border-slate-800 overflow-x-auto space-x-1">
           {categories.flatMap(c => c.items).map((item) => {
             const Icon = item.icon;
-            const isActive = activePage === item.id;
+            const isActive = location.pathname === item.path;
             return (
               <button
                 key={item.id}
-                onClick={() => onNavigate(item.id)}
+                onClick={() => navigate(item.path)}
                 className={`flex flex-col items-center py-1 px-2.5 rounded-lg text-[10px] font-medium transition-all ${
                   isActive
                     ? 'text-emerald-600 dark:text-emerald-400 font-bold'

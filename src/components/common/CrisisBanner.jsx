@@ -14,13 +14,6 @@ export default function CrisisBanner({ onOpenResources, onClose }) {
         </div>
 
         <div className="flex items-center space-x-3 shrink-0">
-          <a
-            href="tel:988"
-            className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white font-bold transition-all"
-          >
-            <PhoneCall className="w-3 h-3" />
-            <span>1767 SOS</span>
-          </a>
 
           <a
             href="tel:1767"

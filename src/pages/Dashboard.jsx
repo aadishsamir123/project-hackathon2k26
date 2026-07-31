@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Heart,
   Sparkles,
@@ -18,7 +19,8 @@ import {
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
 
-export default function Dashboard({ user, onNavigate, onOpenHelp }) {
+export default function Dashboard({ user, onOpenHelp }) {
+  const navigate = useNavigate();
   const [moodLogs, setMoodLogs] = useState([]);
   const [selectedQuickEmotion, setSelectedQuickEmotion] = useState(null);
   const [quickNote, setQuickNote] = useState('');
@@ -123,7 +125,7 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
 
           <div className="flex items-center space-x-3 shrink-0">
             <button
-              onClick={() => onNavigate('mood-tracker')}
+              onClick={() => navigate('/dashboard/myspace/emotionlog')}
               className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2"
             >
               <BookOpen className="w-4 h-4" />
@@ -246,7 +248,7 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
           {/* Quick Action Navigation Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div
-              onClick={() => onNavigate('mood-tracker')}
+              onClick={() => navigate('/dashboard/myspace/emotionlog')}
               className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer group shadow-xs space-y-2"
             >
               <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -262,7 +264,7 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
             </div>
 
             <div
-              onClick={() => onNavigate('ai-mentor')}
+              onClick={() => navigate('/dashboard/calmandai/mindpal')}
               className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer group shadow-xs space-y-2"
             >
               <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -278,7 +280,7 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
             </div>
 
             <div
-              onClick={() => onNavigate('serenity-corner')}
+              onClick={() => navigate('/dashboard/calmandai/serenity')}
               className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-teal-400 dark:hover:border-teal-600 transition-all cursor-pointer group shadow-xs space-y-2"
             >
               <div className="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-300 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -382,7 +384,7 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
                 Recent Journal Logs
               </h3>
               <button
-                onClick={() => onNavigate('mood-tracker')}
+                onClick={() => navigate('/dashboard/myspace/emotionlog')}
                 className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
               >
                 View History
