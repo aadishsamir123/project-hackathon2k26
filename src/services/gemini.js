@@ -11,37 +11,37 @@ if (API_KEY) {
   }
 }
 
-const FLASH_MODEL = "gemini-2.0-flash";
+const FLASH_MODEL = "gemini-3.5-flash-lite";
 
 // ─── Local Curated Affirmations Database (0 API calls consumed) ───────────────
 
 const LOCAL_AFFIRMATIONS = {
   Joyful: [
-    "✨ **Daily Affirmation:** Today is full of light and possibilities. Soak in this moment of happiness and let it nourish your soul.\n\n🌿 *Reflection Prompt:* What made you smile first today?",
-    "✨ **Daily Affirmation:** Your positive energy inspires those around you. Celebrate how far you've come!\n\n🌿 *Reflection Prompt:* How can you share a small piece of your joy with someone today?",
+    "✨ Daily Affirmation: Today is full of light and possibilities. Soak in this moment of happiness and let it nourish your soul.\n\n🌿 Reflection Prompt: What made you smile first today?",
+    "✨ Daily Affirmation: Your positive energy inspires those around you. Celebrate how far you've come!\n\n🌿 Reflection Prompt: How can you share a small piece of your joy with someone today?",
   ],
   Calm: [
-    "✨ **Daily Affirmation:** Peace starts from within. In this quiet moment, trust that you are exactly where you need to be.\n\n🌿 *Reflection Prompt:* What is one thing bringing tranquility to your mind right now?",
-    "✨ **Daily Affirmation:** You don't have to rush through life. Breathe deeply, ground your feet, and move at your own pace.\n\n🌿 *Reflection Prompt:* What is a peaceful habit you'd like to protect today?",
+    "✨ Daily Affirmation: Peace starts from within. In this quiet moment, trust that you are exactly where you need to be.\n\n🌿 Reflection Prompt: What is one thing bringing tranquility to your mind right now?",
+    "✨ Daily Affirmation: You don't have to rush through life. Breathe deeply, ground your feet, and move at your own pace.\n\n🌿 Reflection Prompt: What is a peaceful habit you'd like to protect today?",
   ],
   Anxious: [
-    "✨ **Daily Affirmation:** Anxious thoughts are like passing storm clouds; they are feelings, not permanent facts. You are safe in this present moment.\n\n🌿 *Reflection Prompt:* Place your hand over your heart and take 3 slow breaths. What is 1 thing in your room you feel grounded by?",
-    "✨ **Daily Affirmation:** You have handled 100% of your hardest days so far. Give yourself credit for your courage.\n\n🌿 *Reflection Prompt:* What is one worry you can give yourself permission to set aside for just 1 hour?",
+    "✨ Daily Affirmation: Anxious thoughts are like passing storm clouds; they are feelings, not permanent facts. You are safe in this present moment.\n\n🌿 Reflection Prompt: Place your hand over your heart and take 3 slow breaths. What is 1 thing in your room you feel grounded by?",
+    "✨ Daily Affirmation: You have handled 100% of your hardest days so far. Give yourself credit for your courage.\n\n🌿 Reflection Prompt: What is one worry you can give yourself permission to set aside for just 1 hour?",
   ],
   Overwhelmed: [
-    "✨ **Daily Affirmation:** You do not have to carry everything all at once. Break the mountain down into one single, gentle step.\n\n🌿 *Reflection Prompt:* What is the absolute smallest thing you can accomplish or let go of today?",
-    "✨ **Daily Affirmation:** Rest is not earned; it is necessary. Give your mind permission to pause and recharge.\n\n🌿 *Reflection Prompt:* What would happen if you paused studying for just 15 minutes to sip water?",
+    "✨ Daily Affirmation: You do not have to carry everything all at once. Break the mountain down into one single, gentle step.\n\n🌿 Reflection Prompt: What is the absolute smallest thing you can accomplish or let go of today?",
+    "✨ Daily Affirmation: Rest is not earned; it is necessary. Give your mind permission to pause and recharge.\n\n🌿 Reflection Prompt: What would happen if you paused studying for just 15 minutes to sip water?",
   ],
   Tired: [
-    "✨ **Daily Affirmation:** Listening to your body is a form of self-respect. Sleep and rest are essential building blocks of your success.\n\n🌿 *Reflection Prompt:* How can you make your resting environment more restful tonight?",
-    "✨ **Daily Affirmation:** It's okay if today's energy is low. You are still worthy and doing enough.\n\n🌿 *Reflection Prompt:* What is one low-energy activity that brings you comfort?",
+    "✨ Daily Affirmation: Listening to your body is a form of self-respect. Sleep and rest are essential building blocks of your success.\n\n🌿 Reflection Prompt: How can you make your resting environment more restful tonight?",
+    "✨ Daily Affirmation: It's okay if today's energy is low. You are still worthy and doing enough.\n\n🌿 Reflection Prompt: What is one low-energy activity that brings you comfort?",
   ],
   Sad: [
-    "✨ **Daily Affirmation:** Be gentle with yourself today. It is completely okay to feel sad, and you don't have to force a smile.\n\n🌿 *Reflection Prompt:* Who or what brings you a quiet sense of comfort when things feel heavy?",
-    "✨ **Daily Affirmation:** Your feelings deserve validation. Soften your shoulders and know that warmer days are ahead.\n\n🌿 *Reflection Prompt:* What is one small comfort (tea, warm blanket, quiet song) you can give yourself?",
+    "✨ Daily Affirmation: Be gentle with yourself today. It is completely okay to feel sad, and you don't have to force a smile.\n\n🌿 Reflection Prompt: Who or what brings you a quiet sense of comfort when things feel heavy?",
+    "✨ Daily Affirmation: Your feelings deserve validation. Soften your shoulders and know that warmer days are ahead.\n\n🌿 Reflection Prompt: What is one small comfort (tea, warm blanket, quiet song) you can give yourself?",
   ],
   Default: [
-    "✨ **Daily Affirmation:** You are growing, learning, and adapting every single day. Trust your journey and be kind to your mind.\n\n🌿 *Reflection Prompt:* What is 1 small victory you achieved recently?",
+    "✨ Daily Affirmation: You are growing, learning, and adapting every single day. Trust your journey and be kind to your mind.\n\n🌿 Reflection Prompt: What is 1 small victory you achieved recently?",
   ],
 };
 

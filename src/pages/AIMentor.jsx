@@ -109,10 +109,10 @@ export default function AIMentor({ onOpenResources }) {
             </span>
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight mt-1">
-            MindPal AI Assistant 🤖✨
+            MindPal AI Assistant
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Empathetic AI listener, CBT Thought Reframer, and 5-4-3-2-1 Grounding exercises.
+            Mindful AI listener that will provide empathetic support, cognitive reframing, and grounding exercises. Please note that this AI is not a substitute for professional mental health care. If you are in crisis, please reach out to trained professionals immediately.
           </p>
         </div>
 

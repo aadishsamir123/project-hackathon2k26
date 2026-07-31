@@ -19,28 +19,12 @@ export default function CrisisResources() {
 
   const crisisHelplines = [
     {
-      name: '988 Suicide & Crisis Lifeline',
-      region: 'United States & Canada (24/7)',
-      number: '988',
-      desc: 'Free, confidential support for anyone in suicidal crisis or emotional distress. Call or text 988 anytime.',
-      badge: '24/7 Call & Text',
-      color: 'border-rose-500 bg-rose-50/70 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200'
-    },
-    {
       name: 'SOS Samaritans of Singapore',
       region: 'Singapore (24/7)',
       number: '1767',
       desc: 'Dedicated 24/7 confidential helpline offering emotional support for individuals facing crisis or mental health struggles.',
       badge: '24/7 Hotline',
       color: 'border-rose-500 bg-rose-50/70 dark:bg-rose-950/40 text-rose-900 dark:text-rose-200'
-    },
-    {
-      name: 'Crisis Text Line',
-      region: 'US, UK, Canada (24/7)',
-      number: 'HOME to 741741',
-      desc: 'Text HOME to 741741 to connect with a crisis counselor 24/7 via text messaging.',
-      badge: '24/7 Text Line',
-      color: 'border-indigo-500 bg-indigo-50/70 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200'
     },
     {
       name: 'IMH Mental Health Helpline',
@@ -58,14 +42,6 @@ export default function CrisisResources() {
       badge: 'Youth Specialist',
       color: 'border-emerald-500 bg-emerald-50/70 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-200'
     },
-    {
-      name: 'Befrienders Worldwide',
-      region: 'International Crisis Directory',
-      number: 'befrienders.org',
-      desc: 'Global network of emotional support centers operating in over 30 countries worldwide.',
-      badge: 'Global Directory',
-      color: 'border-purple-500 bg-purple-50/70 dark:bg-purple-950/40 text-purple-900 dark:text-purple-200'
-    }
   ];
 
   const handleCopy = (num) => {

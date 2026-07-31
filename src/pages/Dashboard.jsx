@@ -7,14 +7,13 @@ import {
   ShieldCheck,
   TrendingUp,
   Smile,
-  Frown,
-  Meh,
   Sun,
   RefreshCw,
   Plus,
   CheckCircle2,
   ArrowRight,
-  BookOpen
+  BookOpen,
+  HelpCircle
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
@@ -29,6 +28,15 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
   const [gratitudeText, setGratitudeText] = useState('');
   const [gratitudeLogs, setGratitudeLogs] = useState([]);
   const [gratitudeSaved, setGratitudeSaved] = useState(false);
+  const [journalPromptIndex, setJournalPromptIndex] = useState(0);
+
+  const journalingPrompts = [
+    "What is one small thing that went well for you today?",
+    "Identify a moment you felt calm. What caused it?",
+    "Name a person you appreciate. Why are you grateful for them?",
+    "How did you show kindness to yourself today?",
+    "What is a boundary you successfully maintained today?"
+  ];
 
   const quickEmotions = [
     { name: 'Joyful', emoji: '🌟', color: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800' },
@@ -84,7 +92,6 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
     setTimeout(() => setGratitudeSaved(false), 2000);
   };
 
-  // Recent mood summary calculations
   const recentLogs = moodLogs.slice(0, 5);
   const avgIntensity = moodLogs.length
     ? Math.round(moodLogs.reduce((acc, curr) => acc + (curr.intensity || 5), 0) / moodLogs.length)
@@ -93,80 +100,73 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      {/* Welcome Banner */}
+      {/* Welcome & Mood Focus Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-100 dark:border-slate-800 p-6 sm:p-8 backdrop-blur-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center space-x-1">
-                <Sun className="w-3.5 h-3.5 text-amber-500" />
-                <span>Student Safe Haven</span>
+                <Smile className="w-3.5 h-3.5 text-amber-500" />
+                <span>Student Happiness & Emotion Hub</span>
               </span>
               <span className="text-xs text-slate-400">
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
               </span>
             </div>
             <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-              Welcome to your calm space, {user?.displayName ? user.displayName.split(' ')[0] : 'friend'} 🌿
+              Let's log your emotional state, {user?.displayName ? user.displayName.split(' ')[0] : 'friend'} 🌿
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-              Take a slow breath. MindHaven is here for your emotions, exam stress, peer thoughts, and daily mindfulness.
+              Tracking your mood regularly builds emotional awareness and resiliency. Write in your private journal, fill your Happiness Jar, or talk to MindPal AI.
             </p>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
             <button
               onClick={() => onNavigate('mood-tracker')}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2"
+              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2"
             >
-              <Sparkles className="w-4 h-4" />
-              <span>Full Emotion Journal</span>
-            </button>
-            <button
-              onClick={() => onNavigate('serenity-corner')}
-              className="px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-xs border border-slate-200 dark:border-slate-700 transition-all flex items-center space-x-2"
-            >
-              <Wind className="w-4 h-4 text-emerald-500" />
-              <span>2-Min Breathing</span>
+              <BookOpen className="w-4 h-4" />
+              <span>Write Full Journal Entry</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Grid Section */}
+      {/* Main Grid Experience */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left 2 Columns: Quick Check-in & Affirmation */}
+        {/* Left 2 Columns: Main Mood Tracker & Reflective Journal Prompt */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Quick 1-Click Emotion Check-in */}
+          {/* Quick Check-in with Journal Prompts */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-heading text-base font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
-                  <Heart className="w-4 h-4 text-emerald-500" />
-                  <span>How are you feeling right now?</span>
+                  <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
+                  <span>How is your heart today?</span>
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select an emotion to log your instant daily check-in
+                  Select an emotion and answer the prompt below to add to your private mental health journal.
                 </p>
               </div>
 
               {isSavedQuick && (
                 <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1 animate-fadeIn">
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>Logged to Journal!</span>
+                  <span>Journal entry saved!</span>
                 </span>
               )}
             </div>
 
-            {/* Quick Emotion Buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5">
+            {/* Quick Emotion Picker */}
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
               {quickEmotions.map((item) => (
                 <button
                   key={item.name}
                   onClick={() => handleQuickCheckin(item)}
-                  className={`p-3 rounded-2xl border flex flex-col items-center justify-center space-y-1.5 transition-all duration-200 hover:scale-105 ${
+                  className={`p-3.5 rounded-2xl border flex flex-col items-center justify-center space-y-1.5 transition-all duration-200 hover:scale-105 ${
                     selectedQuickEmotion === item.name
                       ? item.color + ' shadow-xs ring-2 ring-emerald-500/50'
                       : 'bg-slate-50/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
@@ -178,19 +178,34 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
               ))}
             </div>
 
-            {/* Optional Note input */}
-            <div className="flex items-center space-x-2 pt-1">
+            {/* Guided Journaling Prompts Card */}
+            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/60 dark:border-slate-700 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider flex items-center space-x-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Mental Health Writing Prompt</span>
+                </span>
+                <button
+                  onClick={() => setJournalPromptIndex((prev) => (prev + 1) % journalingPrompts.length)}
+                  className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Next Prompt →
+                </button>
+              </div>
+              <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 italic">
+                "{journalingPrompts[journalPromptIndex]}"
+              </p>
               <input
                 type="text"
                 value={quickNote}
                 onChange={(e) => setQuickNote(e.target.value)}
-                placeholder="Optional: Add a brief note (e.g. studied 4 hours, felt calm tea break...)"
-                className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                placeholder="Write your response here..."
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
               />
             </div>
           </div>
 
-          {/* AI Positive Affirmation & Reflection Card */}
+          {/* AI Positive Calm Affirmation */}
           <div className="bg-gradient-to-br from-indigo-50/70 via-purple-50/50 to-emerald-50/60 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-emerald-950/40 border border-indigo-100 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
@@ -199,10 +214,10 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
                 </div>
                 <div>
                   <h4 className="font-heading text-xs font-bold text-indigo-900 dark:text-indigo-200">
-                    Daily AI Calm Affirmation
+                    Daily Affirmation
                   </h4>
                   <p className="text-[10px] text-indigo-600/80 dark:text-indigo-300/80">
-                    Tailored mindfulness & gentle reflection
+                    Mental wellness support and grounding prompts
                   </p>
                 </div>
               </div>
@@ -211,7 +226,6 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
                 onClick={() => fetchAffirmation(selectedQuickEmotion || 'Calm')}
                 disabled={loadingAffirmation}
                 className="p-1.5 rounded-xl bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 text-xs transition-all flex items-center space-x-1"
-                title="Generate new daily affirmation"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${loadingAffirmation ? 'animate-spin' : ''}`} />
                 <span className="text-[11px] font-medium hidden sm:inline">Refresh</span>
@@ -221,7 +235,7 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
             <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-serif italic py-1">
               {loadingAffirmation ? (
                 <div className="py-4 text-center text-slate-400 text-xs font-sans">
-                  Crafting a gentle affirmation for you…
+                  Crafting comfort for you…
                 </div>
               ) : (
                 affirmation || 'You are allowed to take things one step at a time. Rest is an essential part of your growth.'
@@ -229,14 +243,29 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
             </div>
           </div>
 
-          {/* Quick Action Hub */}
+          {/* Quick Action Navigation Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            
             <div
-              onClick={() => onNavigate('ai-mentor')}
+              onClick={() => onNavigate('mood-tracker')}
               className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer group shadow-xs space-y-2"
             >
-              <div className="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
+                <span>Emotion Journal</span>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Log deep emotion ratings, add context tags, and view weekly graphs.
+              </p>
+            </div>
+
+            <div
+              onClick={() => onNavigate('ai-mentor')}
+              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer group shadow-xs space-y-2"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Sparkles className="w-5 h-5" />
               </div>
               <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
@@ -244,31 +273,15 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Talk to an empathetic AI listener & reframe anxious thoughts.
-              </p>
-            </div>
-
-            <div
-              onClick={() => onNavigate('anon-wall')}
-              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer group shadow-xs space-y-2"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <MessageSquareHeart className="w-5 h-5" />
-              </div>
-              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
-                <span>Peer Haven</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Anonymously share feelings & receive warm peer encouragement.
+                Empathetic chat assistant, CBT Thought Reframer, and grounding tools.
               </p>
             </div>
 
             <div
               onClick={() => onNavigate('serenity-corner')}
-              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer group shadow-xs space-y-2"
+              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-teal-400 dark:hover:border-teal-600 transition-all cursor-pointer group shadow-xs space-y-2"
             >
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <div className="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-300 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Wind className="w-5 h-5" />
               </div>
               <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
@@ -276,34 +289,33 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                4-7-8 breathing timers & calming ambient soundscapes.
+                Animated breathing exercise cycles and soothing ambient soundscapes.
               </p>
             </div>
-
           </div>
 
         </div>
 
-        {/* Right 1 Column: Stats, Recent Logs & Gratitude */}
+        {/* Right 1 Column: Stats, Happiness Jar, Recent Entries */}
         <div className="space-y-6">
           
-          {/* Quick Wellbeing Summary Stats */}
+          {/* Mental Health Stats Panel */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
             <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
               <TrendingUp className="w-4 h-4 text-emerald-500" />
-              <span>Wellbeing Metrics</span>
+              <span>Emotional Wellbeing Score</span>
             </h3>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Total Check-ins</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Journal Entries</p>
                 <p className="text-xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
                   {moodLogs.length}
                 </p>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Avg Emotion Rating</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Happiness Index</p>
                 <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
                   {avgIntensity} / 10
                 </p>
@@ -312,68 +324,74 @@ export default function Dashboard({ user, onNavigate, onOpenHelp }) {
 
             <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 text-xs text-emerald-800 dark:text-emerald-300 flex items-center space-x-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Streak Active: <strong>{moodLogs.length ? 'Active Today 🔥' : 'Start Today 🌿'}</strong></span>
+              <span>Consistency Streak: <strong>{moodLogs.length ? 'Active 🔥' : 'Start Log Today 🌿'}</strong></span>
             </div>
           </div>
 
-          {/* Daily Gratitude Journal Widget */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-3">
+          {/* Happiness Jar (Gratitude Collection) */}
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
-                <BookOpen className="w-4 h-4 text-amber-500" />
-                <span>Gratitude Note</span>
-              </h3>
-              {gratitudeSaved && (
-                <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Saved!</span>
-              )}
+              <div>
+                <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
+                  <Smile className="w-4 h-4 text-amber-500" />
+                  <span>Happiness Jar 🍯</span>
+                </h3>
+                <p className="text-[10px] text-slate-400 mt-0.5">Collect small moments of joy</p>
+              </div>
+              
+              <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950 flex items-center justify-center text-xs font-bold text-amber-600">
+                {gratitudeLogs.length}
+              </div>
             </div>
 
+            {/* Gratitude input form */}
             <form onSubmit={handleAddGratitude} className="space-y-2">
               <input
                 type="text"
                 value={gratitudeText}
                 onChange={(e) => setGratitudeText(e.target.value)}
-                placeholder="What is 1 small thing you're grateful for today?"
+                placeholder="What is 1 tiny thing you're grateful for today?"
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
               />
               <button
                 type="submit"
-                className="w-full py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs transition-all shadow-xs flex items-center justify-center space-x-1"
+                className="w-full py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center space-x-1"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Gratitude</span>
+                <span>Add to Happiness Jar</span>
               </button>
             </form>
 
+            {/* Gratitude log list */}
             <div className="space-y-1.5 pt-2 max-h-36 overflow-y-auto">
               {gratitudeLogs.slice(0, 3).map((item) => (
                 <div
                   key={item.id}
                   className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 italic"
                 >
-                  "{item.text}"
+                  " {item.text} "
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Recent Emotion History */}
+          {/* Recent Private Journal Log list */}
           <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100">
-                Recent Journal Entries
+                Recent Journal Logs
               </h3>
               <button
                 onClick={() => onNavigate('mood-tracker')}
                 className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
               >
-                View All
+                View History
               </button>
             </div>
 
             {recentLogs.length === 0 ? (
               <p className="text-xs text-slate-400 italic text-center py-4">
-                No entries logged yet today. Click an emotion above!
+                No entries logged yet. Answer the prompt above!
               </p>
             ) : (
               <div className="space-y-2">

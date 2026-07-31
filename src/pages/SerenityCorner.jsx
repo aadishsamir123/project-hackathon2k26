@@ -20,8 +20,8 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [completedCycles, setCompletedCycles] = useState(0);
 
   const techniques = {
-    '478': { name: '4-7-8 Relaxing Breath', desc: 'Inhale 4s, Hold 7s, Exhale 8s for deep nervous system calm', inhale: 4, hold: 7, exhale: 8 },
-    'box': { name: 'Box Breathing (4-4-4-4)', desc: 'Used by Navy SEALs & athletes to regain focus under pressure', inhale: 4, hold: 4, exhale: 4 },
+    '478': { name: 'Relaxing Breath (4-7-8)', desc: 'Inhale 4s, Hold 7s, Exhale 8s for deep nervous system calm', inhale: 4, hold: 7, exhale: 8 },
+    'box': { name: 'Box Breathing (4-4)', desc: 'Inhale 4s, Hold 4s, Exhale 4s. Used by Navy SEALs & athletes to regain focus under pressure', inhale: 4, hold: 4, exhale: 4 },
     'equal': { name: 'Equal Calm (5-5)', desc: 'Balanced 5s Inhale, 5s Exhale for smooth heart rate variability', inhale: 5, hold: 0, exhale: 5 },
   };
 
@@ -139,7 +139,7 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
                   }`}
                 >
                   <p className="text-xs font-bold">{tech.name}</p>
-                  <p className={`text-[10px] line-clamp-2 ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>
+                  <p className={`text-[10px] line-clamp-5 ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>
                     {tech.desc}
                   </p>
                 </button>

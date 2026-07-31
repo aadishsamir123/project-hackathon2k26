@@ -67,11 +67,10 @@ export default function App() {
     );
   }
 
-  if (isAuthOpen) {
+  if (!user) {
     return (
       <LoginPage
         initialTab={authTab}
-        onBackToHome={() => setIsAuthOpen(false)}
       />
     );
   }
@@ -96,7 +95,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFBF9] dark:bg-[#0F172A] flex flex-col font-sans text-slate-800 dark:text-slate-100 transition-colors duration-300">
+    <div className="min-h-[100vh] w-full bg-[#FAFBF9] dark:bg-[#0F172A] flex flex-col font-sans text-slate-800 dark:text-slate-100 transition-colors duration-300 overflow-x-hidden">
       
       {/* Safety & Crisis Banner */}
       {showCrisisBanner && (
@@ -130,7 +129,7 @@ export default function App() {
       {/* Subtle Footer */}
       <footer className="bg-white/50 dark:bg-slate-900/50 border-t border-slate-200/60 dark:border-slate-800 py-6 px-4 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>MindHaven — Safe, Anonymous Student Emotional Wellness Platform 🌿</span>
+          <span>MindHaven</span>
           <div className="flex items-center space-x-4">
             <button onClick={() => setIsHelpOpen(true)} className="hover:underline">About & FAQ</button>
             <button onClick={() => setActivePage('resources')} className="hover:underline text-rose-500 font-semibold">Crisis Hotlines (988)</button>
