@@ -15,9 +15,9 @@ import {
 import { db } from "../firebase.js";
 
 // Helper for local storage key management
-const LOCAL_STORAGE_MOODS = "mindhaven_mood_logs";
-const LOCAL_STORAGE_POSTS = "mindhaven_anon_posts";
-const LOCAL_STORAGE_GRATITUDE = "mindhaven_gratitude_logs";
+const LOCAL_STORAGE_MOODS = "mindhaven_mood_logs_v2";
+const LOCAL_STORAGE_POSTS = "mindhaven_anon_posts_v2";
+const LOCAL_STORAGE_GRATITUDE = "mindhaven_gratitude_logs_v2";
 
 // Initial seed for Anonymous Posts if empty in local storage
 const INITIAL_ANON_POSTS = [];
@@ -237,20 +237,8 @@ export function addCommentToPost(postId, commentData) {
 export function getLocalGratitudeEntries() {
   const raw = localStorage.getItem(LOCAL_STORAGE_GRATITUDE);
   if (!raw) {
-    const seeds = [
-      {
-        id: "g1",
-        text: "Grateful for hot peppermint tea while studying.",
-        timestamp: new Date(Date.now() - 86400000).toISOString(),
-      },
-      {
-        id: "g2",
-        text: "A friend sent me a funny meme during my exam prep.",
-        timestamp: new Date().toISOString(),
-      },
-    ];
-    localStorage.setItem(LOCAL_STORAGE_GRATITUDE, JSON.stringify(seeds));
-    return seeds;
+    localStorage.setItem(LOCAL_STORAGE_GRATITUDE, JSON.stringify([]));
+    return [];
   }
   return JSON.parse(raw);
 }
