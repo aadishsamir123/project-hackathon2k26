@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Heart,
   MessageSquareHeart,
@@ -7,11 +7,9 @@ import {
   PhoneCall,
   Volume2,
   VolumeX,
-  Sun,
-  Moon,
   LogIn,
-  ShieldAlert,
-  Compass
+  Compass,
+  ChevronDown
 } from 'lucide-react';
 
 export default function Navbar({
@@ -25,34 +23,42 @@ export default function Navbar({
   onOpenAuth,
   onOpenCrisis
 }) {
-  
+  const [openDropdown, setOpenDropdown] = useState(null);
+
   // Categorized Navigation Items
   const categories = [
     {
+      id: 'myspace',
       name: "My Space",
       items: [
-        { id: 'dashboard', label: 'Home Hub', icon: Heart },
-        { id: 'mood-tracker', label: 'Emotion Log', icon: Sparkles }
+        { id: 'dashboard', label: 'Home Hub', desc: 'Emotion summary & happiness jar', icon: Heart },
+        { id: 'mood-tracker', label: 'Emotion Log', desc: 'Private mental health journal', icon: Sparkles }
       ]
     },
     {
+      id: 'calm',
       name: "Calm & AI",
       items: [
-        { id: 'serenity-corner', label: 'Breathing & Calm', icon: Wind },
-        { id: 'ai-mentor', label: 'MindPal AI', icon: Compass }
+        { id: 'serenity-corner', label: 'Breathing & Calm', desc: 'Breathing cycles & soundscapes', icon: Wind },
+        { id: 'ai-mentor', label: 'MindPal AI', desc: 'Empathetic listener & CBT reframe', icon: Compass }
       ]
     },
     {
-      name: "Connect",
+      id: 'connect',
+      name: "Support & Connect",
       items: [
-        { id: 'anon-wall', label: 'Peer Haven', icon: MessageSquareHeart },
-        { id: 'resources', label: 'Help & Crisis', icon: PhoneCall }
+        { id: 'anon-wall', label: 'Peer Haven', desc: 'Anonymous advice & support wall', icon: MessageSquareHeart },
+        { id: 'resources', label: 'Help & Crisis', desc: '24/7 emergency support services', icon: PhoneCall }
       ]
     }
   ];
 
+  const handleDropdownToggle = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
   return (
-    <header className="sticky top-0 z-40 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
+    <header className="sticky top-0 z-45 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
@@ -74,56 +80,65 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Desktop Navigation Links spaced out and categorized */}
-          <nav className="hidden xl:flex items-center space-x-8">
-            {categories.map((cat, idx) => (
-              <div key={idx} className="flex items-center space-x-3 border-r border-slate-150 dark:border-slate-800 last:border-0 pr-8 last:pr-0">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-600 block mr-2">
-                  {cat.name}
-                </span>
-                
-                <div className="flex items-center space-x-2">
-                  {cat.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activePage === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => onNavigate(item.id)}
-                        className={`flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold transition-all duration-200 ${
-                          isActive
-                            ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`} />
-                        <span>{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </nav>
-
-          {/* Fallback for smaller desktop displays (displays flat but spaced) */}
-          <nav className="hidden md:flex xl:hidden items-center space-x-2">
-            {categories.flatMap(c => c.items).map((item) => {
-              const Icon = item.icon;
-              const isActive = activePage === item.id;
+          {/* Desktop Navigation Links with dropdowns */}
+          <nav className="hidden md:flex items-center space-x-6">
+            {categories.map((cat) => {
+              const isAnyActive = cat.items.some(item => activePage === item.id);
               return (
-                <button
-                  key={item.id}
-                  onClick={() => onNavigate(item.id)}
-                  className={`flex items-center space-x-1.5 px-2.5 py-2 rounded-xl text-xs font-bold transition-all duration-250 ${
-                    isActive
-                      ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
+                <div
+                  key={cat.id}
+                  className="relative group"
+                  onMouseEnter={() => setOpenDropdown(cat.id)}
+                  onMouseLeave={() => setOpenDropdown(null)}
                 >
-                  <Icon className="w-3.5 h-3.5" />
-                  <span>{item.label.split(' ')[0]}</span>
-                </button>
+                  <button
+                    onClick={() => handleDropdownToggle(cat.id)}
+                    className={`flex items-center space-x-1 px-3 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 ${
+                      isAnyActive
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <span>{cat.name}</span>
+                    <ChevronDown className="w-3.5 h-3.5 opacity-60 group-hover:rotate-180 transition-transform duration-200" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div className={`absolute top-full left-0 mt-1 w-64 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/85 rounded-2xl shadow-lg p-2.5 transition-all duration-200 origin-top-left ${
+                    openDropdown === cat.id ? 'block scale-100 opacity-100' : 'hidden scale-95 opacity-0'
+                  }`}>
+                    <div className="space-y-1">
+                      {cat.items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activePage === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => {
+                              onNavigate(item.id);
+                              setOpenDropdown(null);
+                            }}
+                            className={`w-full flex items-start space-x-3 p-2.5 rounded-xl text-left transition-all ${
+                              isActive
+                                ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-200'
+                                : 'hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-700 dark:text-slate-300'
+                            }`}
+                          >
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                              isActive ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 dark:bg-slate-905 text-slate-500'
+                            }`}>
+                              <Icon className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold">{item.label}</p>
+                              <p className="text-[10px] text-slate-400 mt-0.5 leading-normal">{item.desc}</p>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </nav>
