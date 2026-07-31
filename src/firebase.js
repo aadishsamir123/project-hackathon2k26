@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+// Firebase configuration for giis-hackathon-2026
 const firebaseConfig = {
   apiKey: "AIzaSyChHhuG0vN_hRE0x_8SNRVkLSZHH-X-kBk",
   authDomain: "giis-hackathon-2026.firebaseapp.com",
