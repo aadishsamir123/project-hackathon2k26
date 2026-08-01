@@ -129,7 +129,7 @@ export default function AnonymousHelpWall() {
                     onClick={() => setPostAlias(a.name)}
                     className={`p-2 rounded-xl text-xs font-medium text-left transition-all ${
                       postAlias === a.name
-                        ? 'ring-2 ring-orange-500 font-bold bg-amber-100 dark:bg-amber-950 text-amber-950'
+                        ? 'ring-2 ring-orange-500 font-bold bg-amber-100 dark:bg-amber-950 text-amber-950 dark:text-amber-200'
                         : 'bg-[#FAF6EE] dark:bg-stone-800 border border-amber-200/50 text-stone-600 dark:text-stone-300'
                     }`}
                   >

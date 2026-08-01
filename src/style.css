@@ -1,10 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  --color-theme-bg: var(--theme-bg);
+  --color-theme-bg-dark: var(--theme-bg-dark);
+  --color-theme-panel: var(--theme-panel);
+  --color-theme-panel-dark: var(--theme-panel-dark);
+  --color-theme-border: var(--theme-border);
+  --color-theme-border-dark: var(--theme-border-dark);
+  --color-theme-primary: var(--theme-primary);
+  --color-theme-primary-hover: var(--theme-primary-hover);
+  --color-theme-text: var(--theme-text);
+  --color-theme-text-dark: var(--theme-text-dark);
+  --color-theme-text-muted: var(--theme-text-muted);
+  --color-theme-text-muted-dark: var(--theme-text-muted-dark);
+  --color-theme-accent: var(--theme-accent);
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #FAF6EE;
-    color: #292524;
+    background-color: var(--theme-bg, #FAF6EE);
+    color: var(--theme-text, #292524);
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+  
+  .dark body {
+    background-color: var(--theme-bg-dark, #1C1917);
+    color: var(--theme-text-dark, #F5F5F4);
   }
   
   h1, h2, h3, h4, .font-heading {

@@ -10,6 +10,7 @@ import HelpModal from './components/common/HelpModal.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import AmbientSoundPlayer from './components/common/AmbientSoundPlayer.jsx';
 import GuidedTourOverlay from './components/common/GuidedTourOverlay.jsx';
+import AnimatedBackground from './components/common/AnimatedBackground.jsx';
 
 // MindHaven Pages
 import Dashboard from './pages/Dashboard.jsx';
@@ -73,21 +74,24 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#FAF6EE] dark:bg-[#1C1917] flex items-center justify-center font-serif">
+      <div className="min-h-screen bg-theme-bg dark:bg-theme-bg-dark flex items-center justify-center font-serif text-theme-text dark:text-theme-text-dark">
         <div className="text-center space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center mx-auto text-white text-xl shadow-md animate-pulse">
             🌿
           </div>
-          <p className="text-sm font-bold text-stone-800 dark:text-stone-200 font-serif">HealthHaven Sanctuary</p>
-          <p className="text-xs text-amber-800/60 dark:text-amber-200/60 italic font-serif">Opening your peaceful path…</p>
+          <p className="text-sm font-bold text-theme-text dark:text-theme-text-dark font-serif">HealthHaven Sanctuary</p>
+          <p className="text-xs text-theme-text/65 dark:text-theme-text-dark/65 italic font-serif">Opening your peaceful path…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100vh] w-full bg-[#FAF6EE] dark:bg-[#1C1917] flex flex-col font-serif text-stone-800 dark:text-stone-100 transition-colors duration-500 overflow-x-hidden">
+    <div className="min-h-[100vh] w-full bg-theme-bg dark:bg-theme-bg-dark flex flex-col font-serif text-theme-text dark:text-theme-text-dark transition-colors duration-500 overflow-x-hidden relative">
       
+      {/* Animated Background */}
+      <AnimatedBackground />
+
       {/* Global Background Ambient Sound Generator */}
       <div className="hidden">
         <AmbientSoundPlayer

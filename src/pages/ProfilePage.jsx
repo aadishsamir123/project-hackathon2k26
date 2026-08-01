@@ -8,12 +8,16 @@ import {
   LogOut,
   Sparkles,
   Save,
-  CheckCircle2
+  CheckCircle2,
+  Palette,
+  Check
 } from 'lucide-react';
 import { updateUserName, logOut } from '../services/auth.js';
 import { subscribeToMoodLogs, getLocalGratitudeEntries } from '../services/firestore.js';
+import { useTheme, themeOptionsList } from '../theme/ThemeContext.jsx';
 
 export default function ProfilePage({ user }) {
+  const { theme, setTheme, enableAnimation, setEnableAnimation } = useTheme();
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -149,6 +153,77 @@ export default function ProfilePage({ user }) {
                 <span>Save Profile Changes</span>
               </button>
             </form>
+          </div>
+
+          {/* Sanctuary Theme Preferences */}
+          <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 border border-amber-200/60 dark:border-stone-800 shadow-xs space-y-5">
+            <div className="flex items-center space-x-2 pb-3 border-b border-amber-200/40 dark:border-stone-800">
+              <Palette className="w-4 h-4 text-orange-600" />
+              <h3 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100">
+                Sanctuary Theme Preferences
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-stone-700 dark:text-stone-300 block mb-2">
+                  Choose Color Theme:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  {themeOptionsList.map((opt) => (
+                    <button
+                      key={opt.id}
+                      onClick={() => setTheme(opt.id)}
+                      className={`flex items-center justify-between p-3 rounded-2xl text-xs font-medium transition-all cursor-pointer ${
+                        theme === opt.id
+                          ? 'ring-2 ring-orange-500 font-bold bg-amber-50/70 dark:bg-stone-800 border-transparent text-orange-700 dark:text-orange-400'
+                          : 'bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50 dark:border-stone-800 text-stone-750 dark:text-stone-300 hover:bg-amber-50/50'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span 
+                          className="w-3.5 h-3.5 rounded-full border border-stone-200 dark:border-stone-700 shrink-0" 
+                          style={{ backgroundColor: opt.color }}
+                        />
+                        <span className="truncate">{opt.name}</span>
+                      </div>
+                      {theme === opt.id && <Check className="w-3.5 h-3.5 text-orange-600 shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Procedural Animation Toggle */}
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50 dark:border-stone-800">
+                <div className="space-y-0.5">
+                  <span className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center space-x-1">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Background Animations</span>
+                  </span>
+                  <span className="text-[10px] text-stone-400 dark:text-stone-500 block">
+                    Procedurally-generated slow floating calming aura background.
+                  </span>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => setEnableAnimation(!enableAnimation)}
+                  className={`w-11 h-6 rounded-full transition-all relative outline-none flex items-center cursor-pointer ${
+                    enableAnimation 
+                      ? 'bg-orange-600' 
+                      : 'bg-stone-300 dark:bg-stone-700'
+                  }`}
+                >
+                  <span 
+                    className={`w-4.5 h-4.5 rounded-full bg-white shadow-xs absolute transition-all ${
+                      enableAnimation 
+                        ? 'translate-x-5.5' 
+                        : 'translate-x-1'
+                    }`} 
+                  />
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Emotional Wellbeing Statistics */}
