@@ -13,6 +13,7 @@ export default function MicroMeditationCards() {
   const osc3Ref = useRef(null);
   const gainNodeRef = useRef(null);
   const timerIntervalRef = useRef(null);
+  const stopTimeoutRef = useRef(null);
 
   const meditations = [
     {
@@ -83,72 +84,46 @@ export default function MicroMeditationCards() {
     }
   ];
 
-  // Speak text using Web Speech API
-  const speakText = (text) => {
-    if ('speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel(); // Stop previous voice speech
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Soothing, friendly preferred voices for meditation
-        const voices = window.speechSynthesis.getVoices();
-        const preferredKeywords = [
-          'samantha',          // iOS/macOS warm premium voice
-          'google us english', // Web Google voice
-          'natural',           // Natural-sounding voices
-          'hazel',             // Soft UK English
-          'zira',              // Smooth Windows voice
-          'susan',
-          'karen',
-          'david',
-          'en-'                // Default English filter
-        ];
-
-        let selectedVoice = null;
-        for (const keyword of preferredKeywords) {
-          selectedVoice = voices.find(v => 
-            v.name.toLowerCase().includes(keyword) && 
-            (v.lang.startsWith('en') || v.lang.startsWith('en-'))
-          );
-          if (selectedVoice) break;
-        }
-
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
-        }
-
-        utterance.rate = 0.82; // Calm, steady meditation pace
-        utterance.pitch = 1.05; // Friendly, warm pitch
-        utterance.volume = 0.95;
-        window.speechSynthesis.speak(utterance);
-      } catch (e) {
-        console.warn("Speech synthesis error:", e);
-      }
-    }
-  };
-
-  // Stop web audio synthesis & speech
+  // Stop web audio synthesis & speech safely without race conditions
   const stopAudio = () => {
     if ('speechSynthesis' in window) {
       try { window.speechSynthesis.cancel(); } catch (e) {}
     }
 
-    try {
-      if (gainNodeRef.current && audioCtxRef.current) {
-        gainNodeRef.current.gain.setTargetAtTime(0.0001, audioCtxRef.current.currentTime, 0.1);
-      }
-      setTimeout(() => {
-        if (osc1Ref.current) { osc1Ref.current.stop(); osc1Ref.current.disconnect(); osc1Ref.current = null; }
-        if (osc2Ref.current) { osc2Ref.current.stop(); osc2Ref.current.disconnect(); osc2Ref.current = null; }
-        if (osc3Ref.current) { osc3Ref.current.stop(); osc3Ref.current.disconnect(); osc3Ref.current = null; }
-        if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-          audioCtxRef.current.close();
-          audioCtxRef.current = null;
-        }
-      }, 150);
-    } catch (e) {
-      console.warn("Stop audio warning:", e);
+    if (stopTimeoutRef.current) {
+      clearTimeout(stopTimeoutRef.current);
+      stopTimeoutRef.current = null;
     }
+
+    const currentCtx = audioCtxRef.current;
+    const currentGain = gainNodeRef.current;
+    const osc1 = osc1Ref.current;
+    const osc2 = osc2Ref.current;
+    const osc3 = osc3Ref.current;
+
+    osc1Ref.current = null;
+    osc2Ref.current = null;
+    osc3Ref.current = null;
+    gainNodeRef.current = null;
+    audioCtxRef.current = null;
+
+    if (currentGain && currentCtx) {
+      try {
+        currentGain.gain.setTargetAtTime(0.0001, currentCtx.currentTime, 0.05);
+      } catch (e) {}
+    }
+
+    stopTimeoutRef.current = setTimeout(() => {
+      try {
+        if (osc1) { osc1.stop(); osc1.disconnect(); }
+        if (osc2) { osc2.stop(); osc2.disconnect(); }
+        if (osc3) { osc3.stop(); osc3.disconnect(); }
+        if (currentCtx && currentCtx.state !== 'closed') {
+          currentCtx.close();
+        }
+      } catch (e) {}
+      stopTimeoutRef.current = null;
+    }, 100);
   };
 
   // Start web audio ambient synthesis with explicit AudioContext resume
@@ -158,7 +133,6 @@ export default function MicroMeditationCards() {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       const ctx = new AudioCtx();
       
-      // Explicitly resume AudioContext for browser user-gesture policy
       if (ctx.state === 'suspended') {
         await ctx.resume();
       }
@@ -166,7 +140,7 @@ export default function MicroMeditationCards() {
 
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 1.0);
+      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.8);
       gainNodeRef.current = gain;
 
       // Soft ambient tone 1 (Sine)
@@ -198,6 +172,65 @@ export default function MicroMeditationCards() {
       osc3Ref.current = osc3;
     } catch (e) {
       console.warn("Web audio synth error:", e);
+    }
+  };
+
+  // Speak text using Web Speech API with smart background music ducking
+  const speakText = (text) => {
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel(); // Cancel any current utterance
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Preferred soothing voices
+        const voices = window.speechSynthesis.getVoices();
+        const preferredKeywords = [
+          'samantha', 'google us english', 'natural', 'hazel', 'zira', 'susan', 'karen', 'david', 'en-'
+        ];
+
+        let selectedVoice = null;
+        for (const keyword of preferredKeywords) {
+          selectedVoice = voices.find(v => 
+            v.name.toLowerCase().includes(keyword) && 
+            (v.lang.startsWith('en') || v.lang.startsWith('en-'))
+          );
+          if (selectedVoice) break;
+        }
+
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+
+        utterance.rate = 0.82; // Calm, steady meditation pace
+        utterance.pitch = 1.05;
+        utterance.volume = 1.0;
+
+        // Duck background music slightly when speech starts
+        utterance.onstart = () => {
+          if (gainNodeRef.current && audioCtxRef.current) {
+            try {
+              gainNodeRef.current.gain.setTargetAtTime(0.15, audioCtxRef.current.currentTime, 0.2);
+            } catch (e) {}
+          }
+        };
+
+        // Restore background music when speech finishes or errors
+        const restoreMusic = () => {
+          if (gainNodeRef.current && audioCtxRef.current) {
+            try {
+              gainNodeRef.current.gain.setTargetAtTime(0.35, audioCtxRef.current.currentTime, 0.4);
+            } catch (e) {}
+          }
+        };
+
+        utterance.onend = restoreMusic;
+        utterance.onerror = restoreMusic;
+
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("Speech synthesis error:", e);
+      }
     }
   };
 
