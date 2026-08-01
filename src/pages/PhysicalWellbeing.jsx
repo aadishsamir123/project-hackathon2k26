@@ -12,7 +12,7 @@ import {
   Play,
   Pause
 } from 'lucide-react';
-import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
+import { markDailyPathStepCompleted } from '../services/firestore.js';
 
 export default function PhysicalWellbeing({ user }) {
   // Hydration state
@@ -66,6 +66,7 @@ export default function PhysicalWellbeing({ user }) {
     const nextCount = Math.min(12, waterCups + 1);
     setWaterCups(nextCount);
     localStorage.setItem('mindhaven_water_count', nextCount.toString());
+    markDailyPathStepCompleted('step-2');
   };
 
   const handleResetWater = () => {
@@ -78,6 +79,7 @@ export default function PhysicalWellbeing({ user }) {
     // Persist sleep data to localStorage
     localStorage.setItem('mindhaven_sleep_hours', sleepHours.toString());
     localStorage.setItem('mindhaven_sleep_quality', sleepQuality);
+    markDailyPathStepCompleted('step-2');
     setSleepSaved(true);
     setTimeout(() => setSleepSaved(false), 3000);
   };

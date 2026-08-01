@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import AmbientSoundPlayer from '../components/common/AmbientSoundPlayer.jsx';
 import MicroMeditationCards from '../components/common/MicroMeditationCards.jsx';
-import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
+import { markDailyPathStepCompleted } from '../services/firestore.js';
 
 export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [breathingTechnique, setBreathingTechnique] = useState('478'); // '478', 'box', 'equal'
@@ -68,13 +68,13 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
                 phaseRef.current = 'Exhale';
                 setMaxPhaseSeconds(currentConfig.exhale);
               }
-            } else if (phaseRef.current === 'Hold') {
-              phaseRef.current = 'Exhale';
-              setMaxPhaseSeconds(currentConfig.exhale);
             } else if (phaseRef.current === 'Exhale') {
               phaseRef.current = 'Inhale';
               setMaxPhaseSeconds(currentConfig.inhale);
-              setCompletedCycles((c) => c + 1);
+              setCompletedCycles((c) => {
+                markDailyPathStepCompleted('step-3');
+                return c + 1;
+              });
             }
 
             const nextMax = phaseRef.current === 'Inhale'

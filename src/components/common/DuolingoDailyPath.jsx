@@ -94,22 +94,56 @@ export default function DuolingoDailyPath({ user }) {
 
   const getTodayStr = () => new Date().toISOString().slice(0, 10);
 
-  const [completedSteps, setCompletedSteps] = useState(() => {
-    const savedDate = localStorage.getItem('mindhaven_daily_path_date');
+  const getInitialCompletedSteps = () => {
     const todayStr = getTodayStr();
-    if (savedDate !== todayStr) {
+    const savedDate = localStorage.getItem('mindhaven_daily_path_date');
+    let completed = [];
+    if (savedDate === todayStr) {
+      const saved = localStorage.getItem('mindhaven_daily_path_completed');
+      if (saved) {
+        try { completed = JSON.parse(saved); } catch (e) {}
+      }
+    } else {
       localStorage.setItem('mindhaven_daily_path_date', todayStr);
       localStorage.setItem('mindhaven_daily_path_completed', JSON.stringify([]));
-      return [];
     }
-    const saved = localStorage.getItem('mindhaven_daily_path_completed');
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) {}
-    }
-    return ['step-1']; // default initial progress for warm demo
-  });
 
+    // Auto-detect if user logged a mood entry today to ensure Step 1 is completed
+    try {
+      const localMoodsRaw = localStorage.getItem('mindhaven_local_mood_logs');
+      if (localMoodsRaw) {
+        const localMoods = JSON.parse(localMoodsRaw);
+        const hasTodayLog = localMoods.some(log => {
+          const dateStr = (log.createdAt || log.timestamp || '').slice(0, 10);
+          return dateStr === todayStr;
+        });
+        if (hasTodayLog && !completed.includes('step-1')) {
+          completed.push('step-1');
+          localStorage.setItem('mindhaven_daily_path_completed', JSON.stringify(completed));
+        }
+      }
+    } catch (e) {}
+
+    return completed;
+  };
+
+  const [completedSteps, setCompletedSteps] = useState(getInitialCompletedSteps);
   const [selectedModalStep, setSelectedModalStep] = useState(null);
+
+  // Synchronize path status with localStorage and custom window events
+  useEffect(() => {
+    const syncFromStorage = () => {
+      setCompletedSteps(getInitialCompletedSteps());
+    };
+
+    window.addEventListener('dailyPathUpdated', syncFromStorage);
+    window.addEventListener('storage', syncFromStorage);
+
+    return () => {
+      window.removeEventListener('dailyPathUpdated', syncFromStorage);
+      window.removeEventListener('storage', syncFromStorage);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('mindhaven_daily_path_completed', JSON.stringify(completedSteps));

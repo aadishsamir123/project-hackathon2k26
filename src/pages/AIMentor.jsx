@@ -16,9 +16,8 @@ import {
   Shield
 } from 'lucide-react';
 import { BookOpen, Sliders } from 'lucide-react';
-import MarkdownRenderer from '../components/common/MarkdownRenderer.jsx';
 import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../services/gemini.js';
-import { subscribeToMoodLogs } from '../services/firestore.js';
+import { subscribeToMoodLogs, markDailyPathStepCompleted } from '../services/firestore.js';
 import { GroundingVagalDiagram } from '../components/wellness/VisualTutorialDiagrams.jsx';
 import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
@@ -104,6 +103,7 @@ export default function AIMentor({ user, onOpenResources }) {
     e.preventDefault();
     if (!inputMessage.trim() || isTyping) return;
 
+    markDailyPathStepCompleted('step-4');
     const userText = inputMessage.trim();
     setInputMessage('');
 

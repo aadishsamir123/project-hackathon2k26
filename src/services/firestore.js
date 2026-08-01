@@ -145,6 +145,35 @@ export async function syncUserProfile(user) {
   }
 }
 
+// ─── Daily Path Progression Helper ──────────────────────────────────────────
+
+export function markDailyPathStepCompleted(stepId) {
+  try {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const savedDate = localStorage.getItem("mindhaven_daily_path_date");
+    let completed = [];
+    if (savedDate === todayStr) {
+      const raw = localStorage.getItem("mindhaven_daily_path_completed");
+      if (raw) {
+        try {
+          completed = JSON.parse(raw);
+        } catch (e) {}
+      }
+    } else {
+      localStorage.setItem("mindhaven_daily_path_date", todayStr);
+    }
+
+    if (!completed.includes(stepId)) {
+      completed.push(stepId);
+      localStorage.setItem("mindhaven_daily_path_completed", JSON.stringify(completed));
+      window.dispatchEvent(new Event("dailyPathUpdated"));
+      window.dispatchEvent(new Event("storage"));
+    }
+  } catch (e) {
+    console.warn("markDailyPathStepCompleted error:", e);
+  }
+}
+
 // ─── Mood & Journal Logs ──────────────────────────────────────────────────────
 
 export async function saveMoodLog(uid, moodData) {
@@ -159,6 +188,9 @@ export async function saveMoodLog(uid, moodData) {
 
   const updatedLocal = [newEntry, ...localLogs];
   localStorage.setItem(LOCAL_STORAGE_MOODS, JSON.stringify(updatedLocal));
+
+  // Automatically mark Step 1 (Morning Mood Check-in) as completed on Daily Path!
+  markDailyPathStepCompleted("step-1");
 
   if (uid && db) {
     try {
