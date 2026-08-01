@@ -15,12 +15,16 @@ import {
   Zap,
   Shield
 } from 'lucide-react';
+import { BookOpen, Sliders } from 'lucide-react';
 import MarkdownRenderer from '../components/common/MarkdownRenderer.jsx';
 import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../services/gemini.js';
+import { subscribeToMoodLogs } from '../services/firestore.js';
 import { GroundingVagalDiagram } from '../components/wellness/VisualTutorialDiagrams.jsx';
 
-export default function AIMentor({ onOpenResources }) {
+export default function AIMentor({ user, onOpenResources }) {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat', 'reframer', 'grounding'
+  const [journalLogs, setJournalLogs] = useState([]);
+  const [useJournalContext, setUseJournalContext] = useState(true);
   
   // Chat state
   const [chatMessages, setChatMessages] = useState([
@@ -50,11 +54,34 @@ export default function AIMentor({ onOpenResources }) {
 
   const messagesContainerRef = useRef(null);
 
+  // Subscribe to mood journal logs for context-aware responses
+  useEffect(() => {
+    const unsub = subscribeToMoodLogs(user?.uid, (logs) => {
+      setJournalLogs(logs);
+    });
+    return unsub;
+  }, [user]);
+
   useEffect(() => {
     if (messagesContainerRef.current) {
       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
     }
   }, [chatMessages, isTyping]);
+
+  // Build a compact journal context string from recent mood logs
+  const buildJournalContext = (logs) => {
+    if (!logs || logs.length === 0) return '';
+    const recent = logs.slice(0, 10); // last 10 entries
+    const lines = recent.map(log => {
+      const date = new Date(log.createdAt || log.timestamp);
+      const dateStr = isNaN(date.getTime()) ? 'Recent' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const parts = [`[${dateStr}] Mood: ${log.emotion || 'Unknown'} (Intensity: ${log.intensity ?? '?'}/10)`];
+      if (log.tags && log.tags.length > 0) parts.push(`Context tags: ${log.tags.join(', ')}`);
+      if (log.note) parts.push(`Note: "${log.note.slice(0, 120)}${log.note.length > 120 ? '...' : ''}"`);
+      return parts.join(' | ');
+    });
+    return lines.join('\n');
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -79,7 +106,8 @@ export default function AIMentor({ onOpenResources }) {
       const crisisKeywords = ['suicide', 'end my life', 'want to die', 'harm myself', 'no point living'];
       const matchesCrisis = crisisKeywords.some((k) => userText.toLowerCase().includes(k));
 
-      const response = await getEmpatheticCounselorResponse(userText, 'Student Chat', newChat);
+      const journalContext = useJournalContext ? buildJournalContext(journalLogs) : '';
+      const response = await getEmpatheticCounselorResponse(userText, 'Student Chat', newChat, journalContext);
 
       setChatMessages([
         ...newChat,
@@ -200,10 +228,36 @@ export default function AIMentor({ onOpenResources }) {
               </div>
             </div>
 
-            <p className="text-[11px] text-stone-400 hidden sm:block italic">
-              "You are worthy of support and care."
-            </p>
+            {/* Journal Context Toggle */}
+            <button
+              onClick={() => setUseJournalContext(!useJournalContext)}
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                useJournalContext && journalLogs.length > 0
+                  ? 'border-orange-400 bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300'
+                  : 'border-amber-200/60 dark:border-stone-700 bg-[#FFFDF9] dark:bg-stone-800 text-stone-500 dark:text-stone-400'
+              }`}
+              title={useJournalContext ? 'Journal context is ON — MindPal reads your entries' : 'Journal context is OFF'}
+            >
+              <BookOpen className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">
+                {useJournalContext && journalLogs.length > 0
+                  ? `Journal-Aware (${journalLogs.length})`
+                  : journalLogs.length === 0
+                  ? 'No Journal Yet'
+                  : 'Journal Off'}
+              </span>
+            </button>
           </div>
+
+          {/* Journal Context Banner */}
+          {useJournalContext && journalLogs.length > 0 && (
+            <div className="px-4 py-2 bg-orange-50/80 dark:bg-orange-950/30 border-b border-orange-200/60 dark:border-orange-900/40 flex items-center space-x-2">
+              <BookOpen className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+              <p className="text-[11px] text-orange-700 dark:text-orange-300 leading-snug">
+                <span className="font-bold">Journal-Aware Mode:</span> MindPal has privately read your {journalLogs.length} journal entries and will personalize its support based on your emotional patterns and reflections.
+              </p>
+            </div>
+          )}
 
           {/* Messages Area */}
           <div ref={messagesContainerRef} className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">

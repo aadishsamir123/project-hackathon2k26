@@ -50,7 +50,8 @@ const LOCAL_AFFIRMATIONS = {
 export async function getEmpatheticCounselorResponse(
   userMessage,
   moodContext = "Neutral",
-  history = []
+  history = [],
+  journalContext = ""
 ) {
   if (!userMessage || !userMessage.trim()) {
     return "I'm right here. Feel free to share what's on your mind.";
@@ -59,9 +60,14 @@ export async function getEmpatheticCounselorResponse(
   if (ai) {
     for (const modelName of MODELS) {
       try {
-        const prompt = `You are MindPal, a warm, compassionate AI mental health companion for students. 
-Keep response under 140 words, non-clinical, encouraging, concise markdown format.
-Student Message: "${userMessage}"`;
+        let prompt = `You are MindPal, a warm, compassionate AI mental health companion for students. 
+Keep response under 140 words, non-clinical, encouraging, concise markdown format.`;
+
+        if (journalContext) {
+          prompt += `\n\nHere is the student's recent private journal entries context for personalization:\n${journalContext}\nUse this context gently to personalize your support, referencing their reflections, moods, or triggers if helpful.`;
+        }
+
+        prompt += `\n\nStudent Message: "${userMessage}"`;
 
         const response = await ai.models.generateContent({
           model: modelName,

@@ -144,9 +144,9 @@ export default function App() {
                     <Route path="myspace/emotionlog" element={<MoodTracker user={user} />} />
                     <Route path="myspace/physical" element={<PhysicalWellbeing user={user} />} />
                     <Route path="profile/me" element={<ProfilePage user={user} />} />
-                    <Route path="calmandai/mindpal" element={<AIMentor onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
+                    <Route path="calmandai/mindpal" element={<AIMentor user={user} onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
                     <Route path="calmandai/serenity" element={<SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />} />
-                    <Route path="calmandai/wellness-guide" element={<WellnessGuide />} />
+                    <Route path="calmandai/wellness-guide" element={<WellnessGuide user={user} />} />
                     <Route path="connect/peerhaven" element={<AnonymousHelpWall />} />
                     <Route path="connect/resources" element={<CrisisResources />} />
                     <Route path="*" element={<Navigate to="myspace/homehub" replace />} />

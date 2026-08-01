@@ -1,26 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Heart,
   Sparkles,
   MessageSquareHeart,
   Wind,
-  ShieldCheck,
   TrendingUp,
-  Smile,
   Sun,
-  RefreshCw,
   Plus,
-  CheckCircle2,
   ArrowRight,
   BookOpen,
   HelpCircle,
   Activity,
-  Droplet,
   Moon,
   Compass,
   PhoneCall,
-  MapPin
+  MapPin,
+  AlertTriangle,
+  BarChart3
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
@@ -85,7 +82,45 @@ export default function Dashboard({ user, onOpenHelp }) {
     ? (moodLogs.reduce((acc, curr) => acc + (curr.intensity || 5), 0) / moodLogs.length).toFixed(1)
     : '7.5';
 
-  const waterCount = localStorage.getItem('mindhaven_water_count') || '3';
+  const waterCount = parseInt(localStorage.getItem('mindhaven_water_count') || '3', 10);
+
+  // Proactive burnout trend detection — last 7 days
+  const burnoutAlert = useMemo(() => {
+    if (moodLogs.length < 3) return null;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recentLogs = moodLogs.filter(log => {
+      const ts = log.createdAt?.toDate?.()?.getTime?.() || new Date(log.createdAt || 0).getTime();
+      return ts >= sevenDaysAgo;
+    });
+    // Count distress tags
+    const tagCounts = {};
+    const distressTags = ['Anxious', 'Overwhelmed', 'Exams', 'Stressed', 'Burned Out', 'Tired', 'Sad', 'Burnout'];
+    recentLogs.forEach(log => {
+      const emotion = log.emotion || '';
+      if (distressTags.some(t => emotion.toLowerCase().includes(t.toLowerCase()))) {
+        tagCounts[emotion] = (tagCounts[emotion] || 0) + 1;
+      }
+      (log.tags || []).forEach(t => {
+        if (distressTags.some(d => t.toLowerCase().includes(d.toLowerCase()))) {
+          tagCounts[t] = (tagCounts[t] || 0) + 1;
+        }
+      });
+    });
+    const topTag = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])[0];
+    if (topTag && topTag[1] >= 3) return { tag: topTag[0], count: topTag[1] };
+    return null;
+  }, [moodLogs]);
+
+  // Mood-body correlation: mood avg vs hydration
+  const correlationInsight = useMemo(() => {
+    const mood = parseFloat(avgIntensity);
+    const water = waterCount;
+    if (mood >= 7 && water >= 6) return { type: 'positive', text: `Your mood (${mood}/10) and hydration (${water} cups) are both high — your mind-body connection is thriving! 💪` };
+    if (mood < 5 && water < 4) return { type: 'negative', text: `Low mood (${mood}/10) often correlates with low hydration (${water} cups). Try drinking more water today. 💧` };
+    if (mood < 5) return { type: 'mood', text: `Your average mood is ${mood}/10 this week. Breathing exercises and journaling can help shift this pattern.` };
+    if (water < 4) return { type: 'hydration', text: `You're only hitting ${water} cups today. Research links hydration to better focus and reduced anxiety. 💧` };
+    return null;
+  }, [avgIntensity, waterCount]);
 
   // Simple, Serene Path Stations
   const pathStations = [
@@ -141,13 +176,13 @@ export default function Dashboard({ user, onOpenHelp }) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100/80 dark:bg-amber-950 text-amber-900 dark:text-amber-200 border border-amber-200">
-              🌿 Peaceful Sanctuary Path
+              🌿 Student Burnout Prevention · Peaceful Sanctuary Path
             </span>
             <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mt-2">
               Welcome, {user?.displayName ? user.displayName.split(' ')[0] : 'Friend'}
             </h1>
             <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
-              Follow the simple path below to care for your mind and body today.
+              Your daily check-in for student burnout prevention — caring for your mind and body one step at a time.
             </p>
           </div>
 
@@ -175,6 +210,31 @@ export default function Dashboard({ user, onOpenHelp }) {
           </div>
         )}
       </div>
+
+      {/* Proactive Burnout Trend Alert */}
+      {burnoutAlert && (
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-400/50 dark:border-amber-700 rounded-3xl p-4 sm:p-5 flex items-start space-x-3 shadow-xs">
+          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+            <AlertTriangle className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
+              Pattern Detected — Burnout Risk Identified
+            </p>
+            <p className="text-xs text-amber-800/80 dark:text-amber-300/80 mt-1 leading-relaxed">
+              You've logged <span className="font-bold">"{burnoutAlert.tag}"</span> {burnoutAlert.count}× this week. This pattern may indicate student burnout building up. MindPal can help you work through it.
+            </p>
+            <button
+              onClick={() => navigate('/dashboard/calmandai/mindpal')}
+              className="mt-2.5 inline-flex items-center space-x-1.5 text-xs font-bold text-amber-800 dark:text-amber-200 bg-amber-200/60 dark:bg-amber-900/60 hover:bg-amber-200 dark:hover:bg-amber-800 px-3 py-1.5 rounded-xl transition-all"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Talk to MindPal Now</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Quick Heart Check-in */}
       <div className="bg-[#FFFDF9] dark:bg-[#262220] p-5 rounded-3xl border border-amber-200/60 dark:border-stone-800 shadow-xs space-y-3">
@@ -254,7 +314,7 @@ export default function Dashboard({ user, onOpenHelp }) {
       {/* Summary Metrics & Gratitude Jar */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
         
-        {/* Wellbeing Summary */}
+        {/* Wellbeing Summary + Correlation */}
         <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-5 border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-3">
           <h3 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
             <TrendingUp className="w-4 h-4 text-orange-600" />
@@ -263,19 +323,36 @@ export default function Dashboard({ user, onOpenHelp }) {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60">
-              <p className="text-[10px] text-stone-500 font-medium">Happiness Index</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Mood Index</p>
               <p className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mt-1">
-                {avgIntensity} / 10
+                {avgIntensity} <span className="text-xs font-normal text-stone-400">/ 10</span>
               </p>
+              <p className="text-[10px] text-stone-400 mt-0.5">{moodLogs.length} entries logged</p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60">
-              <p className="text-[10px] text-stone-500 font-medium">Hydration Log</p>
+              <p className="text-[10px] text-stone-500 dark:text-stone-400 font-medium">Hydration Today</p>
               <p className="text-xl font-extrabold text-stone-800 dark:text-stone-100 mt-1">
-                {waterCount} / 8 <span className="text-xs font-normal">cups</span>
+                {waterCount} <span className="text-xs font-normal text-stone-400">/ 8 cups</span>
               </p>
+              <div className="flex space-x-0.5 mt-1.5">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className={`h-1.5 flex-1 rounded-full ${i < waterCount ? 'bg-orange-500' : 'bg-amber-100 dark:bg-stone-700'}`} />
+                ))}
+              </div>
             </div>
           </div>
+
+          {/* Mood–Body Correlation Insight */}
+          {correlationInsight && (
+            <div className="p-3 rounded-2xl bg-amber-50/60 dark:bg-stone-900 border border-amber-200/50 dark:border-stone-700 flex items-start space-x-2">
+              <BarChart3 className="w-3.5 h-3.5 text-orange-600 shrink-0 mt-0.5" />
+              <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                <span className="font-bold text-orange-700 dark:text-orange-300">Mind-Body Correlation: </span>
+                {correlationInsight.text}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Happiness Jar */}
@@ -286,7 +363,7 @@ export default function Dashboard({ user, onOpenHelp }) {
               <span>Happiness Jar</span>
             </h3>
             <span className="text-xs text-stone-400">
-              {gratitudeLogs.length} Memories
+              {gratitudeLogs.length} {gratitudeLogs.length === 1 ? 'Memory' : 'Memories'}
             </span>
           </div>
 
@@ -307,10 +384,24 @@ export default function Dashboard({ user, onOpenHelp }) {
             </button>
           </form>
 
-          {gratitudeLogs.length > 0 && (
-            <div className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 text-xs text-stone-700 dark:text-stone-300 truncate">
-              "{gratitudeLogs[0].text}"
+          {gratitudeLogs.length === 0 ? (
+            <div className="p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-dashed border-amber-300/60 dark:border-stone-700 text-center space-y-1">
+              <p className="text-lg">☕</p>
+              <p className="text-xs text-stone-600 dark:text-stone-300 font-medium">Your jar is empty — start filling it!</p>
+              <p className="text-[11px] text-stone-400 leading-snug">Even "had a warm coffee" counts. Small joys build resilience.</p>
             </div>
+          ) : (
+            <div className="space-y-1.5 max-h-32 overflow-y-auto">
+              {gratitudeLogs.slice(0, 3).map((entry, i) => (
+                <div key={i} className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 text-xs text-stone-700 dark:text-stone-300 italic leading-relaxed">
+                  "{entry?.text || entry}"
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showGratitudeSuccess && (
+            <p className="text-[11px] text-orange-600 font-semibold text-center">✓ Memory saved to your jar!</p>
           )}
         </div>
 
@@ -360,7 +451,7 @@ export default function Dashboard({ user, onOpenHelp }) {
           </button>
 
           <button
-            onClick={() => navigate('/dashboard/physical')}
+            onClick={() => navigate('/dashboard/myspace/physical')}
             className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
           >
             <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">90° Ergonomics</span>
@@ -368,7 +459,7 @@ export default function Dashboard({ user, onOpenHelp }) {
           </button>
 
           <button
-            onClick={() => navigate('/dashboard/physical')}
+            onClick={() => navigate('/dashboard/myspace/physical')}
             className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
           >
             <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">Cat-Cow Mobility</span>

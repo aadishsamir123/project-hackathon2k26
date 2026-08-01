@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   BookOpen,
   Sparkles,
@@ -25,11 +25,44 @@ import {
   ErgonomicsPostureDiagram,
   HybridSystemDiagram
 } from '../components/wellness/VisualTutorialDiagrams.jsx';
+import { subscribeToMoodLogs } from '../services/firestore.js';
 
-export default function WellnessGuide() {
+export default function WellnessGuide({ user }) {
   const [selectedPart, setSelectedPart] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [openCardIds, setOpenCardIds] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const [openCardIds, setOpenCardIds] = useState([]); // default collapsed for density
+  const [moodLogs, setMoodLogs] = useState([]);
+
+  useEffect(() => {
+    const unsub = subscribeToMoodLogs(user?.uid, (logs) => setMoodLogs(logs));
+    return unsub;
+  }, [user]);
+
+  // Compute personalized recommendation based on user's mood history
+  const personalRec = useMemo(() => {
+    if (moodLogs.length < 2) return null;
+    const tagCounts = {};
+    moodLogs.forEach(log => {
+      const emotion = log.emotion || '';
+      tagCounts[emotion] = (tagCounts[emotion] || 0) + 1;
+      (log.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+    });
+    const sorted = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+    const topPattern = sorted[0]?.[0]?.toLowerCase() || '';
+    if (['anxious', 'anxiety', 'exam', 'overwhelmed', 'stressed'].some(k => topPattern.includes(k))) {
+      return { id: 2, title: 'The Anti-Anxiety Notebook', reason: 'CBT thought records and grounding exercises directly target exam stress and anxiety — your most frequent pattern.' };
+    }
+    if (['tired', 'sleep', 'rest', 'fatigue', 'burnout'].some(k => topPattern.includes(k))) {
+      return { id: 1, title: 'The Five Minute Journal', reason: 'A 5-minute morning priming routine can restore positivity when burnout or tiredness is your dominant mood.' };
+    }
+    if (['sad', 'hopeless', 'lonely', 'isolated'].some(k => topPattern.includes(k))) {
+      return { id: 3, title: 'Wreck This Journal (Somatic)', reason: 'Somatic movement and expressive exercises are especially effective when mood is consistently low or withdrawn.' };
+    }
+    if (['physical', 'health', 'body', 'posture', 'wrist', 'neck'].some(k => topPattern.includes(k))) {
+      return { id: 8, title: 'Moleskine Wellness Journal', reason: 'Your check-in history includes physical symptoms — ergonomics and long-term health archiving can help.' };
+    }
+    return { id: 5, title: 'Progressive Overload Journal', reason: 'Your mood logs show regular entries — a structured habit tracking system can help you build sustainable wellness.' };
+  }, [moodLogs]);
 
   const toggleCard = (id) => {
     setOpenCardIds((prev) =>
@@ -240,6 +273,34 @@ export default function WellnessGuide() {
         </div>
       </div>
 
+      {/* Personalized Methodology Recommendation */}
+      {personalRec && (
+        <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-300/60 dark:border-orange-800/50 rounded-3xl p-5 flex items-start space-x-4 shadow-xs">
+          <div className="w-10 h-10 rounded-2xl bg-orange-100 dark:bg-orange-900/60 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-400 mb-1">Personalized For You — Based on Your Journal History</p>
+            <p className="text-sm font-bold text-stone-900 dark:text-stone-100">
+              Recommended: {personalRec.title}
+            </p>
+            <p className="text-xs text-stone-600 dark:text-stone-300 mt-1 leading-relaxed">
+              {personalRec.reason}
+            </p>
+            <button
+              onClick={() => {
+                setOpenCardIds(prev => prev.includes(personalRec.id) ? prev : [...prev, personalRec.id]);
+                setTimeout(() => document.getElementById(`wellness-card-${personalRec.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+              }}
+              className="mt-2 inline-flex items-center space-x-1.5 text-xs font-bold text-orange-700 dark:text-orange-300 hover:underline"
+            >
+              <span>View this methodology</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Controls: Category Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Category Tabs */}
@@ -315,6 +376,7 @@ export default function WellnessGuide() {
           return (
             <div
               key={item.id}
+              id={`wellness-card-${item.id}`}
               className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl border border-amber-200/80 dark:border-stone-800 shadow-xs overflow-hidden transition-all"
             >
               {/* Card Header Bar */}

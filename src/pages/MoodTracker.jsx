@@ -250,8 +250,12 @@ export default function MoodTracker({ user }) {
 
           <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
             {filteredLogs.length === 0 ? (
-              <div className="p-6 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 text-center text-xs text-stone-400 italic">
-                No entries yet. Write your first reflection on the left.
+              <div className="p-8 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-dashed border-amber-300/60 dark:border-stone-700 text-center space-y-2">
+                <p className="text-2xl">🌱</p>
+                <p className="text-xs font-bold text-stone-700 dark:text-stone-200">Your journal is waiting</p>
+                <p className="text-[11px] text-stone-400 leading-relaxed max-w-xs mx-auto">
+                  Log your first emotion on the left to begin tracking your personal wellbeing journey. Every entry helps MindPal understand you better.
+                </p>
               </div>
             ) : (
               filteredLogs.map((log) => (

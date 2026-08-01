@@ -19,9 +19,14 @@ export default function PhysicalWellbeing({ user }) {
     return saved ? parseInt(saved, 10) : 3;
   });
 
-  // Sleep state
-  const [sleepHours, setSleepHours] = useState(7);
-  const [sleepQuality, setSleepQuality] = useState('Restful');
+  // Sleep state — persisted to localStorage
+  const [sleepHours, setSleepHours] = useState(() => {
+    const saved = localStorage.getItem('mindhaven_sleep_hours');
+    return saved ? parseFloat(saved) : 7;
+  });
+  const [sleepQuality, setSleepQuality] = useState(() => {
+    return localStorage.getItem('mindhaven_sleep_quality') || 'Restful';
+  });
   const [sleepSaved, setSleepSaved] = useState(false);
 
   // Eye Rest 20-20-20 Timer state
@@ -68,6 +73,9 @@ export default function PhysicalWellbeing({ user }) {
 
   const handleSaveSleep = (e) => {
     e.preventDefault();
+    // Persist sleep data to localStorage
+    localStorage.setItem('mindhaven_sleep_hours', sleepHours.toString());
+    localStorage.setItem('mindhaven_sleep_quality', sleepQuality);
     setSleepSaved(true);
     setTimeout(() => setSleepSaved(false), 3000);
   };
