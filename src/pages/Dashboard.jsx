@@ -316,6 +316,75 @@ export default function Dashboard({ user, onOpenHelp }) {
 
       </div>
 
+      {/* 📘 MIND & BODY PRACTICE HUB (JOURNAL GUIDELINE TOOLKITS) */}
+      <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200/60 dark:border-stone-800">
+          <div className="flex items-center space-x-3">
+            <div className="w-9 h-9 rounded-2xl bg-amber-100 dark:bg-amber-950 text-orange-700 dark:text-orange-300 flex items-center justify-center font-bold">
+              <BookOpen className="w-4.5 h-4.5" />
+            </div>
+            <div>
+              <h3 className="font-heading text-base font-bold text-stone-800 dark:text-stone-100">
+                Mind & Body Practice Hub
+              </h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                9 evidence-based toolkits integrated from leading wellness & reflection journals.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => navigate('/dashboard/calmandai/wellness-guide')}
+            className="px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition-all flex items-center space-x-1.5 self-start sm:self-auto"
+          >
+            <span>Open Interactive Handbook</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 pt-1">
+          <button
+            onClick={() => navigate('/dashboard/myspace/emotionlog')}
+            className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">5-4-3-2-1 Grounding</span>
+            <span className="text-[10px] text-stone-400 block mt-0.5">Anti-Anxiety Notebook</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard/myspace/emotionlog')}
+            className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">PMR Muscle Release</span>
+            <span className="text-[10px] text-stone-400 block mt-0.5">Wreck This Journal</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard/physical')}
+            className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">90° Ergonomics</span>
+            <span className="text-[10px] text-stone-400 block mt-0.5">Moleskine Workstation</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard/physical')}
+            className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">Cat-Cow Mobility</span>
+            <span className="text-[10px] text-stone-400 block mt-0.5">Papier Yoga Journal</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard/calmandai/serenity')}
+            className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 dark:border-stone-800 hover:border-orange-400 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block group-hover:text-orange-600">Box Breathing 4-4</span>
+            <span className="text-[10px] text-stone-400 block mt-0.5">Five Minute Journal</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   );
 }

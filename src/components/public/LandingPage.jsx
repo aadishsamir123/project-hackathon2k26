@@ -3,7 +3,7 @@ import EwasteMapIframe from '../map/EwasteMapIframe.jsx';
 
 const HACKATHON_HIGHLIGHTS = [
   { id: 'simulator', title: '1. Playable Campus Survival Game 🎮', icon: '🎮', desc: 'Interactive decision rounds for money, GPA grades, stress & carbon.' },
-  { id: 'ai-mentor', title: '2. MindPal AI Campus Companion 🤖', icon: '🤖', desc: 'Instant AI student advice & mental health counselor.' },
+  { id: 'ai-mentor', title: '2. MindPal AI Campus Companion ✨', icon: '✨', desc: 'Instant AI student advice & mental health counselor.' },
   { id: 'leaderboard', title: '3. Singapore Campus Leaderboard 🏆', icon: '🏆', desc: 'Compete across NUS, NTU, SMU, Polys & JCs for high scores & badges.' },
   { id: 'textbook-swap', title: '4. Textbook & Gear Swap Hub 📖', icon: '📖', desc: 'Swap textbooks, notes, calculators & dorm supplies directly on Telegram.' },
   { id: 'eco-commute', title: '5. Eco-Commute Planner 🚴', icon: '🚴', desc: 'Compare carbon & money saved walking/cycling/shuttles vs Grab.' },

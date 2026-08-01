@@ -9,7 +9,8 @@ import {
   ChevronLeft,
   X,
   Smile,
-  Compass
+  Compass,
+  Bot
 } from 'lucide-react';
 
 export default function OnboardingTutorialModal({ isOpen, onClose, onComplete }) {
@@ -24,18 +25,18 @@ export default function OnboardingTutorialModal({ isOpen, onClose, onComplete })
       title: "Your Student Emotional Safe Space",
       desc: "HealthHaven is a minimalistic, comforting platform built for students to track feelings, build resilience, and receive gentle guidance without judgment.",
       highlights: [
-        "100% Private & Student-Focused",
-        "Calming Dark & Light Design",
-        "Built-in Crisis Safety & Support"
+        "Singapore Helpline Direct Access",
+        "Privacy-first Local Data Architecture",
+        "Warm, Calming Design Tokens"
       ],
-      color: "from-emerald-500 to-teal-500",
-      accentBg: "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300"
+      color: "from-amber-500 to-orange-500",
+      accentBg: "bg-amber-50 dark:bg-amber-950/50 text-amber-800 dark:text-amber-200"
     },
     {
-      icon: BookOpen,
-      badge: "My Space & Journaling 📖",
-      title: "Track Your Emotions & Happiness Jar",
-      desc: "Log daily feelings using quick emotion buttons, record private journal entries, and save small moments of joy inside your Happiness Jar.",
+      icon: Sparkles,
+      badge: "Emotional Reflection 📓",
+      title: "Heart Journal & Mood Trends",
+      desc: "Log daily moods, track emotional patterns, and write down gratitude moments in your personal encrypted space.",
       highlights: [
         "Weekly Emotional Wellbeing Graphs",
         "Happiness Jar Gratitude Log",
@@ -45,8 +46,8 @@ export default function OnboardingTutorialModal({ isOpen, onClose, onComplete })
       accentBg: "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300"
     },
     {
-      icon: Compass,
-      badge: "MindPal AI 🤖",
+      icon: Bot,
+      badge: "MindPal AI Companion",
       title: "Empathetic Listener & CBT Tools",
       desc: "Chat with MindPal AI for empathetic listening, reframe negative thoughts using CBT techniques, or complete 5-4-3-2-1 sensory grounding exercises.",
       highlights: [

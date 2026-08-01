@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 import {
   Heart,
   MessageSquareHeart,
@@ -17,7 +18,11 @@ import {
   X,
   User,
   LogOut,
-  MapPin
+  MapPin,
+  Sun,
+  Moon,
+  Bot,
+  BookOpen
 } from 'lucide-react';
 import { logOut } from '../../services/auth.js';
 
@@ -49,7 +54,8 @@ export default function Navbar({
       name: "Stillness & AI",
       items: [
         { id: 'serenity', path: '/dashboard/calmandai/serenity', label: 'Serenity & Breathing', desc: 'Peaceful breathing & warm soundscapes', icon: Wind },
-        { id: 'mindpal', path: '/dashboard/calmandai/mindpal', label: 'MindPal Companion', desc: 'Gentle listener & CBT thought reframing', icon: Compass }
+        { id: 'mindpal', path: '/dashboard/calmandai/mindpal', label: 'MindPal Companion', desc: 'Gentle listener & CBT thought reframing', icon: Bot },
+        { id: 'wellness-guide', path: '/dashboard/calmandai/wellness-guide', label: 'Mind & Body Guide', desc: 'Complete handbook & visual practice toolkit', icon: BookOpen }
       ]
     },
     {
@@ -72,7 +78,7 @@ export default function Navbar({
 
   return (
     <>
-      <header className="sticky top-0 z-45 w-full bg-[#FAF6EE]/95 dark:bg-[#1C1917]/95 backdrop-blur-md border-b border-amber-200/60 dark:border-stone-800 transition-colors duration-500">
+      <header className="sticky top-0 z-45 w-full bg-[#FAF6EE]/80 dark:bg-[#1C1917]/80 backdrop-blur-md border-b border-amber-200/60 dark:border-stone-800 transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             
@@ -90,8 +96,8 @@ export default function Navbar({
                 onClick={() => navigate('/dashboard/myspace/homehub')}
                 className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0"
               >
-                <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center text-white shadow-sm shadow-amber-600/20 group-hover:scale-105 transition-transform duration-300">
-                  <Heart className="w-4 h-4 sm:w-6 sm:h-6 fill-white/20" />
+                <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                  <img src={logo} alt="HealthHaven Logo" className="w-full h-full object-contain" />
                 </div>
                 <div>
                   <span className="font-heading text-base sm:text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight font-serif">
@@ -198,24 +204,37 @@ export default function Navbar({
                 {isAudioPlaying ? <Volume2 className="w-4 h-4 text-amber-600 animate-pulse" /> : <VolumeX className="w-4 h-4" />}
               </button>
 
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={onToggleDarkMode}
+                className="p-2 sm:p-2.5 rounded-xl border text-xs font-medium transition-all shrink-0 bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/80 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:text-amber-900 dark:hover:text-amber-200"
+                title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {isDarkMode ? <Sun className="w-4 h-4 text-amber-500 animate-pulse-soft" /> : <Moon className="w-4 h-4" />}
+              </button>
+
               {/* User Profile display */}
               {user ? (
                 <button
                   onClick={() => navigate('/dashboard/profile/me')}
-                  className={`flex items-center space-x-2 pl-0.5 sm:pl-1 cursor-pointer hover:opacity-90 focus:outline-none transition-all rounded-xl shrink-0 ${
-                    location.pathname === '/dashboard/profile/me' ? 'ring-2 ring-amber-600' : ''
-                  }`}
+                  className="flex items-center justify-center cursor-pointer hover:opacity-90 focus:outline-none transition-all rounded-xl shrink-0"
                   title="View Sanctuary Profile"
                 >
                   {user.photoURL ? (
                     <img
                       src={user.photoURL}
                       alt="User Profile"
-                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-amber-300 dark:border-amber-750 shadow-xs"
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl object-cover border border-amber-300 dark:border-amber-700 shadow-xs transition-all ${
+                        location.pathname === '/dashboard/profile/me' ? 'ring-2 ring-orange-500' : ''
+                      }`}
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 flex items-center justify-center font-bold text-xs font-serif">
+                    <div
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-200/80 dark:bg-amber-900 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 flex items-center justify-center font-bold text-xs font-serif transition-all ${
+                        location.pathname === '/dashboard/profile/me' ? 'ring-2 ring-orange-500' : ''
+                      }`}
+                    >
                       {user.displayName ? user.displayName.charAt(0).toUpperCase() : 'S'}
                     </div>
                   )}
@@ -250,8 +269,8 @@ export default function Navbar({
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-4 border-b border-amber-200/60 dark:border-stone-800">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center text-white shadow-md">
-                    <Heart className="w-5 h-5 fill-white/20" />
+                  <div className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-md overflow-hidden">
+                    <img src={logo} alt="HealthHaven Logo" className="w-full h-full object-contain" />
                   </div>
                   <div>
                     <h2 className="font-heading text-xl font-bold font-serif text-stone-900 dark:text-stone-100">
@@ -277,6 +296,31 @@ export default function Navbar({
                 <PhoneCall className="w-4 h-4 animate-pulse" />
                 <span>24/7 Emergency Care Path</span>
               </button>
+
+              {/* Quick Settings: Audio & Dark Mode */}
+              <div className="flex items-center space-x-2">
+                {/* Audio Toggle */}
+                <button
+                  onClick={onToggleAudio}
+                  className={`flex-1 py-2 px-3 rounded-xl border text-[11px] font-serif font-bold transition-all flex items-center justify-center space-x-2 shrink-0 ${
+                    isAudioPlaying
+                      ? 'bg-amber-100 dark:bg-amber-950 border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 shadow-xs'
+                      : 'bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/80 dark:border-stone-700 text-stone-600 dark:text-stone-300'
+                  }`}
+                >
+                  {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5 text-amber-600 animate-pulse" /> : <VolumeX className="w-3.5 h-3.5" />}
+                  <span>SoundScape</span>
+                </button>
+
+                {/* Dark Mode Toggle */}
+                <button
+                  onClick={onToggleDarkMode}
+                  className="flex-1 py-2 px-3 rounded-xl border text-[11px] font-serif font-bold transition-all flex items-center justify-center space-x-2 shrink-0 bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/80 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:text-amber-900 dark:hover:text-amber-200"
+                >
+                  {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-500 animate-pulse-soft" /> : <Moon className="w-3.5 h-3.5" />}
+                  <span>{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+                </button>
+              </div>
 
               {/* Categorized Navigation Links */}
               <div className="space-y-5">

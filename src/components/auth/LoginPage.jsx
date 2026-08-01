@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithEmail, signUpWithEmail, signInWithGoogle } from '../../services/auth.js';
 import { Heart, ArrowLeft, Shield } from 'lucide-react';
+import logo from '../../assets/logo.png';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
@@ -64,8 +65,8 @@ export default function LoginPage({ initialTab = 'signin', onBackToHome }) {
       <div className="w-full max-w-md mx-auto my-auto py-6">
         {/* Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 text-white shadow-lg shadow-orange-500/20 mb-3">
-            <Heart className="w-7 h-7 fill-white/20 text-white" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-3 overflow-hidden shadow-lg shadow-orange-500/10">
+            <img src={logo} alt="HealthHaven Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="font-heading text-2xl font-bold text-stone-900 dark:text-stone-100 tracking-tight">
             HealthHaven Student Sanctuary

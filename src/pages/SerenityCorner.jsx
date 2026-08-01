@@ -18,7 +18,7 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [completedCycles, setCompletedCycles] = useState(0);
 
   const phaseRef = useRef('Inhale');
-  const elapsedRef = useRef(0);
+  const [elapsedMs, setElapsedMs] = useState(0);
 
   const techniques = {
     '478': { name: '4-7-8 Relaxing Breath', desc: 'Inhale 4s, Hold 7s, Exhale 8s for nervous system calm', inhale: 4, hold: 7, exhale: 8 },
@@ -38,10 +38,12 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
     if (isBreathingActive) {
       const config = techniques[breathingTechnique];
       phaseRef.current = 'Inhale';
-      elapsedRef.current = 0;
       setBreathingPhase('Inhale');
       setMaxPhaseSeconds(config.inhale);
       setTimerSeconds(config.inhale);
+      setElapsedMs(0);
+
+      const tickMs = 50;
 
       interval = setInterval(() => {
         const currentConfig = techniques[breathingTechnique];
@@ -51,43 +53,48 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
             ? currentConfig.hold
             : currentConfig.exhale;
 
-        elapsedRef.current += 1;
+        const currentMaxMs = currentMax * 1000;
 
-        if (elapsedRef.current > currentMax) {
-          if (phaseRef.current === 'Inhale') {
-            if (currentConfig.hold > 0) {
-              phaseRef.current = 'Hold';
-              setMaxPhaseSeconds(currentConfig.hold);
-            } else {
+        setElapsedMs((prev) => {
+          const next = prev + tickMs;
+          if (next >= currentMaxMs) {
+            // Move to next phase
+            if (phaseRef.current === 'Inhale') {
+              if (currentConfig.hold > 0) {
+                phaseRef.current = 'Hold';
+                setMaxPhaseSeconds(currentConfig.hold);
+              } else {
+                phaseRef.current = 'Exhale';
+                setMaxPhaseSeconds(currentConfig.exhale);
+              }
+            } else if (phaseRef.current === 'Hold') {
               phaseRef.current = 'Exhale';
               setMaxPhaseSeconds(currentConfig.exhale);
+            } else if (phaseRef.current === 'Exhale') {
+              phaseRef.current = 'Inhale';
+              setMaxPhaseSeconds(currentConfig.inhale);
+              setCompletedCycles((c) => c + 1);
             }
-          } else if (phaseRef.current === 'Hold') {
-            phaseRef.current = 'Exhale';
-            setMaxPhaseSeconds(currentConfig.exhale);
-          } else if (phaseRef.current === 'Exhale') {
-            phaseRef.current = 'Inhale';
-            setMaxPhaseSeconds(currentConfig.inhale);
-            setCompletedCycles((c) => c + 1);
-          }
 
-          elapsedRef.current = 0;
-          setBreathingPhase(phaseRef.current);
-          setTimerSeconds(
-            phaseRef.current === 'Inhale'
+            const nextMax = phaseRef.current === 'Inhale'
               ? currentConfig.inhale
               : phaseRef.current === 'Hold'
                 ? currentConfig.hold
-                : currentConfig.exhale
-          );
-        } else {
-          setTimerSeconds(currentMax - elapsedRef.current);
-        }
-      }, 1000);
+                : currentConfig.exhale;
+
+            setBreathingPhase(phaseRef.current);
+            setTimerSeconds(nextMax);
+            return 0;
+          } else {
+            setTimerSeconds(Math.ceil((currentMaxMs - next) / 1000));
+            return next;
+          }
+        });
+      }, tickMs);
     } else {
       setBreathingPhase('Ready');
       setTimerSeconds(0);
-      elapsedRef.current = 0;
+      setElapsedMs(0);
     }
     return () => clearInterval(interval);
   }, [isBreathingActive, breathingTechnique]);
@@ -96,12 +103,12 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
     setIsBreathingActive(false);
     setBreathingPhase('Ready');
     setTimerSeconds(0);
-    elapsedRef.current = 0;
+    setElapsedMs(0);
     setCompletedCycles(0);
   };
 
   const progressPercent = maxPhaseSeconds > 0
-    ? (elapsedRef.current / maxPhaseSeconds) * 100
+    ? (elapsedMs / (maxPhaseSeconds * 1000)) * 100
     : 0;
 
   return (
@@ -188,7 +195,7 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
                     cx="50"
                     cy="50"
                     r="44"
-                    className="stroke-orange-500 fill-none transition-all duration-1000 ease-linear"
+                    className="stroke-orange-500 fill-none transition-[stroke-dashoffset] duration-75 ease-linear"
                     strokeWidth="3.5"
                     strokeDasharray="276.46"
                     strokeDashoffset={Math.max(0, 276.46 - (276.46 * Math.min(100, progressPercent)) / 100)}

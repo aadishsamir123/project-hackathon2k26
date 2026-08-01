@@ -13,7 +13,7 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <Card variant="outlined" sx={{ borderRadius: 7, p: 1, bgcolor: '#ffffff' }}>
+    <Card variant="outlined" sx={{ borderRadius: 7, p: 1, bgcolor: 'var(--theme-panel, #ffffff)', borderColor: 'var(--theme-border, #e1e4e1)' }}>
       <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
         {/* Header */}
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2 }}>
@@ -23,8 +23,8 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
                 width: 40,
                 height: 40,
                 borderRadius: 4,
-                bgcolor: '#e6f4ea',
-                color: '#006d44',
+                bgcolor: 'var(--theme-border, #e6f4ea)',
+                color: 'var(--theme-primary, #006d44)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -39,8 +39,8 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
                 label={badge || 'M3 User Guide'}
                 size="small"
                 sx={{
-                  bgcolor: '#e6f4ea',
-                  color: '#004026',
+                  bgcolor: 'var(--theme-border, #e6f4ea)',
+                  color: 'var(--theme-primary, #004026)',
                   fontWeight: 700,
                   fontSize: '0.65rem',
                   textTransform: 'uppercase',
@@ -48,7 +48,7 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
                   mb: 0.5,
                 }}
               />
-              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#191c1a', lineHeight: 1.2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'var(--theme-text, #191c1a)', lineHeight: 1.2 }}>
                 {title}
               </Typography>
             </Box>
@@ -61,8 +61,8 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
             endIcon={isOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
             sx={{
               borderRadius: 100,
-              color: '#404943',
-              borderColor: '#c0c9c2',
+              color: 'var(--theme-text-muted, #404943)',
+              borderColor: 'var(--theme-border, #c0c9c2)',
               fontSize: '0.75rem',
               px: 2,
               py: 0.5,
@@ -74,17 +74,17 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
 
         {/* Collapsible Content */}
         <Collapse in={isOpen}>
-          <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid #e1e4e1', display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="body2" sx={{ color: '#404943', lineHeight: 1.6 }}>
+          <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid var(--theme-border, #e1e4e1)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Typography variant="body2" sx={{ color: 'var(--theme-text-muted, #404943)', lineHeight: 1.6 }}>
               {summary}
             </Typography>
 
             {steps && steps.length > 0 && (
-              <Box sx={{ bgcolor: '#f2f4f2', p: 2, borderRadius: 4, border: '1px solid #e1e4e1' }}>
-                <Typography variant="caption" sx={{ fontWeight: 700, color: '#191c1a', display: 'block', mb: 1 }}>
+              <Box sx={{ bgcolor: 'var(--theme-bg, #f2f4f2)', p: 2, borderRadius: 4, border: '1px solid var(--theme-border, #e1e4e1)' }}>
+                <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--theme-text, #191c1a)', display: 'block', mb: 1 }}>
                   Step-by-Step Instructions:
                 </Typography>
-                <ol style={{ margin: 0, paddingLeft: 18, fontSize: '0.8rem', color: '#404943' }}>
+                <ol style={{ margin: 0, paddingLeft: 18, fontSize: '0.8rem', color: 'var(--theme-text-muted, #404943)' }}>
                   {steps.map((step, idx) => (
                     <li key={idx} style={{ marginBottom: 4 }}>{step}</li>
                   ))}
@@ -94,22 +94,22 @@ export default function KnowledgeCard({ title, badge, summary, steps, formula, p
 
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
               {formula && (
-                <Box sx={{ bgcolor: '#e6f4ea', p: 2, borderRadius: 4, border: '1px solid #bce3ca' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#004026', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
+                <Box sx={{ bgcolor: 'var(--theme-border, #e6f4ea)', p: 2, borderRadius: 4, border: '1px solid var(--theme-border, #bce3ca)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--theme-primary, #004026)', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                     🧮 Calculation Basis
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#006d44', fontWeight: 600, display: 'block', lineHeight: 1.4 }}>
+                  <Typography variant="caption" sx={{ color: 'var(--theme-primary, #006d44)', fontWeight: 600, display: 'block', lineHeight: 1.4 }}>
                     {formula}
                   </Typography>
                 </Box>
               )}
 
               {policyNote && (
-                <Box sx={{ bgcolor: '#f2f4f2', p: 2, borderRadius: 4, border: '1px solid #e1e4e1' }}>
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: '#191c1a', display: 'flex', items: 'center', gap: 0.5, mb: 0.5 }}>
+                <Box sx={{ bgcolor: 'var(--theme-bg, #f2f4f2)', p: 2, borderRadius: 4, border: '1px solid var(--theme-border, #e1e4e1)' }}>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'var(--theme-text, #191c1a)', display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.5 }}>
                     🇸🇬 Singapore Policy Baseline
                   </Typography>
-                  <Typography variant="caption" sx={{ color: '#404943', display: 'block', lineHeight: 1.4 }}>
+                  <Typography variant="caption" sx={{ color: 'var(--theme-text-muted, #404943)', display: 'block', lineHeight: 1.4 }}>
                     {policyNote}
                   </Typography>
                 </Box>

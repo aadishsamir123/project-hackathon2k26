@@ -10,7 +10,8 @@ import HelpModal from './components/common/HelpModal.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import AmbientSoundPlayer from './components/common/AmbientSoundPlayer.jsx';
 import GuidedTourOverlay from './components/common/GuidedTourOverlay.jsx';
-import AnimatedBackground from './components/common/AnimatedBackground.jsx';
+import AnimatedThemeBackground from './components/common/AnimatedThemeBackground.jsx';
+import logo from './assets/logo.png';
 
 // MindHaven Pages
 import Dashboard from './pages/Dashboard.jsx';
@@ -21,6 +22,9 @@ import AIMentor from './pages/AIMentor.jsx';
 import SerenityCorner from './pages/SerenityCorner.jsx';
 import CrisisResources from './pages/CrisisResources.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import WellnessGuide from './pages/WellnessGuide.jsx';
+
+import { useTheme } from './theme/ThemeContext.jsx';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -29,7 +33,7 @@ export default function App() {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, setIsDarkMode } = useTheme();
   const [showCrisisBanner, setShowCrisisBanner] = useState(true);
 
   const navigate = useNavigate();
@@ -63,24 +67,14 @@ export default function App() {
     }
   };
 
-  // Handle Dark mode toggle class on documentElement
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-theme-bg dark:bg-theme-bg-dark flex items-center justify-center font-serif text-theme-text dark:text-theme-text-dark">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center mx-auto text-white text-xl shadow-md animate-pulse">
-            🌿
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto shadow-md animate-pulse overflow-hidden bg-white/5">
+            <img src={logo} alt="HealthHaven Logo" className="w-full h-full object-contain" />
           </div>
-          <p className="text-sm font-bold text-theme-text dark:text-theme-text-dark font-serif">HealthHaven Sanctuary</p>
-          <p className="text-xs text-theme-text/65 dark:text-theme-text-dark/65 italic font-serif">Opening your peaceful path…</p>
+          <p className="text-sm font-semibold tracking-wide font-heading">HealthHaven ..</p>
         </div>
       </div>
     );
@@ -89,8 +83,8 @@ export default function App() {
   return (
     <div className="min-h-[100vh] w-full bg-theme-bg dark:bg-theme-bg-dark flex flex-col font-serif text-theme-text dark:text-theme-text-dark transition-colors duration-500 overflow-x-hidden relative">
       
-      {/* Animated Background */}
-      <AnimatedBackground />
+      {/* Animated Subtle Ambient Theme Blur Background */}
+      <AnimatedThemeBackground />
 
       {/* Global Background Ambient Sound Generator */}
       <div className="hidden">
@@ -108,7 +102,12 @@ export default function App() {
             user ? (
               <Navigate to="/dashboard/myspace/homehub" replace />
             ) : (
-              <LoginPage initialTab={authTab} />
+              <LoginPage 
+                initialTab={authTab}
+                authTab={authTab}
+                setAuthTab={setAuthTab}
+                onLoginSuccess={() => navigate('/dashboard/myspace/homehub')}
+              />
             )
           }
         />
@@ -147,6 +146,7 @@ export default function App() {
                     <Route path="profile/me" element={<ProfilePage user={user} />} />
                     <Route path="calmandai/mindpal" element={<AIMentor onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
                     <Route path="calmandai/serenity" element={<SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />} />
+                    <Route path="calmandai/wellness-guide" element={<WellnessGuide />} />
                     <Route path="connect/peerhaven" element={<AnonymousHelpWall />} />
                     <Route path="connect/resources" element={<CrisisResources />} />
                     <Route path="*" element={<Navigate to="myspace/homehub" replace />} />
@@ -154,11 +154,12 @@ export default function App() {
                 </main>
 
                 {/* Warm Serene Footer */}
-                <footer className="bg-[#FFFDF9]/60 dark:bg-[#262220]/60 border-t border-amber-200/60 dark:border-stone-800 py-6 px-4 text-center text-xs text-stone-500 dark:text-stone-400">
+                <footer className="relative z-10 bg-[#FFFDF9]/60 dark:bg-[#262220]/60 backdrop-blur-md border-t border-amber-200/60 dark:border-stone-800 py-6 px-4 text-center text-xs text-stone-500 dark:text-stone-400">
                   <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
                     <span className="font-heading font-bold text-stone-700 dark:text-stone-300">HealthHaven Sanctuary</span>
                     <div className="flex items-center space-x-4">
-                      <button onClick={() => setIsHelpOpen(true)} className="hover:text-stone-800 dark:hover:text-stone-200 hover:underline">About & Guide</button>
+                      <button onClick={() => navigate('/dashboard/calmandai/wellness-guide')} className="hover:text-stone-800 dark:hover:text-stone-200 hover:underline font-semibold">Handbook & Guide</button>
+                      <button onClick={() => setIsHelpOpen(true)} className="hover:text-stone-800 dark:hover:text-stone-200 hover:underline">About</button>
                       <button onClick={() => navigate('/dashboard/connect/resources')} className="hover:underline text-rose-600 dark:text-rose-400 font-bold">24/7 Crisis Care</button>
                     </div>
                   </div>

@@ -60,7 +60,7 @@ export default function HelpModal({ isOpen, onClose, onOpenResources }) {
               <li className="flex items-start space-x-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5 shrink-0" />
                 <div>
-                  <strong className="text-slate-700 dark:text-slate-200">Peer Haven:</strong> Share feelings anonymously, receive warm peer reactions (🤍 warmth, 🤝 support), and read comforting thoughts from fellow students.
+                  <strong className="text-slate-700 dark:text-slate-200">Peer Haven:</strong> Share feelings anonymously, receive warm peer reactions, and read comforting thoughts from fellow students.
                 </div>
               </li>
               <li className="flex items-start space-x-2">

@@ -13,6 +13,8 @@ export const themeVariables = {
       '--theme-text': '#191c1a',
       '--theme-text-muted': '#404943',
       '--theme-accent': '#10B981',
+      '--theme-font-body': "'Lora', 'Georgia', serif",
+      '--theme-font-heading': "'Playfair Display', serif",
     },
     dark: {
       '--theme-bg-dark': '#1C1917',
@@ -23,6 +25,8 @@ export const themeVariables = {
       '--theme-text-dark': '#FAF6EE',
       '--theme-text-muted-dark': '#A8A29E',
       '--theme-accent': '#34D399',
+      '--theme-font-body': "'Lora', 'Georgia', serif",
+      '--theme-font-heading': "'Playfair Display', serif",
     }
   },
   ocean: {
@@ -35,6 +39,8 @@ export const themeVariables = {
       '--theme-text': '#0F172A',
       '--theme-text-muted': '#475569',
       '--theme-accent': '#06B6D4',
+      '--theme-font-body': "'Inter', system-ui, -apple-system, sans-serif",
+      '--theme-font-heading': "'Outfit', 'Inter', sans-serif",
     },
     dark: {
       '--theme-bg-dark': '#0F172A',
@@ -45,6 +51,8 @@ export const themeVariables = {
       '--theme-text-dark': '#F8FAFC',
       '--theme-text-muted-dark': '#94A3B8',
       '--theme-accent': '#38BDF8',
+      '--theme-font-body': "'Inter', system-ui, -apple-system, sans-serif",
+      '--theme-font-heading': "'Outfit', 'Inter', sans-serif",
     }
   },
   sunset: {
@@ -57,6 +65,8 @@ export const themeVariables = {
       '--theme-text': '#2D150B',
       '--theme-text-muted': '#78350F',
       '--theme-accent': '#F97316',
+      '--theme-font-body': "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+      '--theme-font-heading': "'Outfit', sans-serif",
     },
     dark: {
       '--theme-bg-dark': '#271C19',
@@ -67,6 +77,8 @@ export const themeVariables = {
       '--theme-text-dark': '#FFF9F5',
       '--theme-text-muted-dark': '#FDBA74',
       '--theme-accent': '#FB923C',
+      '--theme-font-body': "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+      '--theme-font-heading': "'Outfit', sans-serif",
     }
   },
   lavender: {
@@ -79,6 +91,8 @@ export const themeVariables = {
       '--theme-text': '#1E1B4B',
       '--theme-text-muted': '#4C1D95',
       '--theme-accent': '#8B5CF6',
+      '--theme-font-body': "'Lora', 'Georgia', serif",
+      '--theme-font-heading': "'Outfit', sans-serif",
     },
     dark: {
       '--theme-bg-dark': '#1E1B4B',
@@ -89,6 +103,8 @@ export const themeVariables = {
       '--theme-text-dark': '#F5F3FF',
       '--theme-text-muted-dark': '#C084FC',
       '--theme-accent': '#A78BFA',
+      '--theme-font-body': "'Lora', 'Georgia', serif",
+      '--theme-font-heading': "'Outfit', sans-serif",
     }
   },
   midnight: {
@@ -101,6 +117,8 @@ export const themeVariables = {
       '--theme-text': '#09090B',
       '--theme-text-muted': '#52525B',
       '--theme-accent': '#71717A',
+      '--theme-font-body': "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+      '--theme-font-heading': "'Inter', sans-serif",
     },
     dark: {
       '--theme-bg-dark': '#09090B',
@@ -111,6 +129,8 @@ export const themeVariables = {
       '--theme-text-dark': '#FAFAFA',
       '--theme-text-muted-dark': '#A1A1AA',
       '--theme-accent': '#E4E4E7',
+      '--theme-font-body': "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+      '--theme-font-heading': "'Inter', sans-serif",
     }
   }
 };
@@ -128,9 +148,8 @@ export function ThemeContextProvider({ children }) {
     return localStorage.getItem('mindhaven-theme') || 'emerald';
   });
 
-  const [enableAnimation, setEnableAnimationState] = useState(() => {
-    const saved = localStorage.getItem('mindhaven-bg-animation');
-    return saved !== null ? saved === 'true' : true;
+  const [isDarkMode, setIsDarkModeState] = useState(() => {
+    return localStorage.getItem('mindhaven-dark-mode') === 'true';
   });
 
   const setTheme = (newTheme) => {
@@ -140,31 +159,42 @@ export function ThemeContextProvider({ children }) {
     }
   };
 
-  const setEnableAnimation = (val) => {
-    setEnableAnimationState(val);
-    localStorage.setItem('mindhaven-bg-animation', val ? 'true' : 'false');
+  const setIsDarkMode = (val) => {
+    setIsDarkModeState(val);
+    localStorage.setItem('mindhaven-dark-mode', val ? 'true' : 'false');
   };
 
-  // Apply variables to root element on theme change
+  // Apply theme classes to root element
   useEffect(() => {
-    const vars = themeVariables[theme];
-    if (!vars) return;
-
     const root = document.documentElement;
+    
+    // Manage class names for pure CSS theme selections
+    root.classList.remove('theme-emerald', 'theme-ocean', 'theme-sunset', 'theme-lavender', 'theme-midnight');
+    root.classList.add(`theme-${theme}`);
 
-    // Apply light mode variables
-    Object.entries(vars.light).forEach(([name, val]) => {
-      root.style.setProperty(name, val);
-    });
-
-    // Apply dark mode variables
-    Object.entries(vars.dark).forEach(([name, val]) => {
-      root.style.setProperty(name, val);
-    });
+    // Remove any leftover inline style property overrides so stylesheet CSS rules dictate values
+    const varsToClean = [
+      '--theme-bg', '--theme-panel', '--theme-primary', '--theme-primary-hover',
+      '--theme-border', '--theme-text', '--theme-text-muted', '--theme-accent',
+      '--theme-font-body', '--theme-font-heading', '--theme-bg-dark', '--theme-panel-dark',
+      '--theme-border-dark', '--theme-text-dark', '--theme-text-muted-dark',
+      '--theme-glow-1', '--theme-glow-2', '--theme-glow-3'
+    ];
+    varsToClean.forEach(v => root.style.removeProperty(v));
   }, [theme]);
 
+  // Handle Dark mode toggle class on documentElement
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, enableAnimation, setEnableAnimation }}>
+    <ThemeContext.Provider value={{ theme, setTheme, isDarkMode, setIsDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

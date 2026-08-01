@@ -12,8 +12,15 @@ import {
   Play,
   Pause
 } from 'lucide-react';
+import {
+  ProgressiveOverloadDiagram,
+  CatCowMobilityDiagram,
+  HIITProtocolDiagram,
+  ErgonomicsPostureDiagram
+} from '../components/wellness/VisualTutorialDiagrams.jsx';
 
 export default function PhysicalWellbeing({ user }) {
+  const [activePhysToolkit, setActivePhysToolkit] = useState('ergonomics');
   // Hydration state
   const [waterCups, setWaterCups] = useState(() => {
     const saved = localStorage.getItem('mindhaven_water_count');
@@ -300,6 +307,78 @@ export default function PhysicalWellbeing({ user }) {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* 🏋️ PHYSICAL & ERGONOMICS PRACTICE TOOLKITS SECTION */}
+      <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 sm:p-8 border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-amber-200/60 dark:border-stone-800">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950 text-orange-700 dark:text-orange-300 flex items-center justify-center font-bold">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-heading text-base font-bold text-stone-800 dark:text-stone-100">
+                Interactive Physical & Ergonomic Toolkits
+              </h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                Directly from Moleskine Ergonomics, Papier Yoga, SaltWrap Fitness, and Fitlosophy journals.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-1.5 bg-[#FAF6EE] dark:bg-stone-900 p-1.5 rounded-2xl border border-amber-200/60 dark:border-stone-800 overflow-x-auto">
+            <button
+              onClick={() => setActivePhysToolkit('ergonomics')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                activePhysToolkit === 'ergonomics'
+                  ? 'bg-orange-600 text-white shadow-xs'
+                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
+              }`}
+            >
+              90° Ergonomics
+            </button>
+
+            <button
+              onClick={() => setActivePhysToolkit('catcow')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                activePhysToolkit === 'catcow'
+                  ? 'bg-orange-600 text-white shadow-xs'
+                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
+              }`}
+            >
+              Cat-Cow Mobility
+            </button>
+
+            <button
+              onClick={() => setActivePhysToolkit('overload')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                activePhysToolkit === 'overload'
+                  ? 'bg-orange-600 text-white shadow-xs'
+                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
+              }`}
+            >
+              Overload Calculator
+            </button>
+
+            <button
+              onClick={() => setActivePhysToolkit('hiit')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
+                activePhysToolkit === 'hiit'
+                  ? 'bg-orange-600 text-white shadow-xs'
+                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
+              }`}
+            >
+              HIIT 2:1 Timer
+            </button>
+          </div>
+        </div>
+
+        <div>
+          {activePhysToolkit === 'ergonomics' && <ErgonomicsPostureDiagram />}
+          {activePhysToolkit === 'catcow' && <CatCowMobilityDiagram />}
+          {activePhysToolkit === 'overload' && <ProgressiveOverloadDiagram />}
+          {activePhysToolkit === 'hiit' && <HIITProtocolDiagram />}
         </div>
       </div>
 

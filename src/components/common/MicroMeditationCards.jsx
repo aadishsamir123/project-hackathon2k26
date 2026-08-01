@@ -89,9 +89,37 @@ export default function MicroMeditationCards() {
       try {
         window.speechSynthesis.cancel(); // Stop previous voice speech
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.88; // Calm meditation pace
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
+        
+        // Soothing, friendly preferred voices for meditation
+        const voices = window.speechSynthesis.getVoices();
+        const preferredKeywords = [
+          'samantha',          // iOS/macOS warm premium voice
+          'google us english', // Web Google voice
+          'natural',           // Natural-sounding voices
+          'hazel',             // Soft UK English
+          'zira',              // Smooth Windows voice
+          'susan',
+          'karen',
+          'david',
+          'en-'                // Default English filter
+        ];
+
+        let selectedVoice = null;
+        for (const keyword of preferredKeywords) {
+          selectedVoice = voices.find(v => 
+            v.name.toLowerCase().includes(keyword) && 
+            (v.lang.startsWith('en') || v.lang.startsWith('en-'))
+          );
+          if (selectedVoice) break;
+        }
+
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+
+        utterance.rate = 0.82; // Calm, steady meditation pace
+        utterance.pitch = 1.05; // Friendly, warm pitch
+        utterance.volume = 0.95;
         window.speechSynthesis.speak(utterance);
       } catch (e) {
         console.warn("Speech synthesis error:", e);

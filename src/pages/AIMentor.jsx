@@ -16,8 +16,8 @@ import {
   Shield
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../services/gemini.js';
+import { GroundingVagalDiagram } from '../components/wellness/VisualTutorialDiagrams.jsx';
 
 export default function AIMentor({ onOpenResources }) {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat', 'reframer', 'grounding'
@@ -132,7 +132,7 @@ export default function AIMentor({ onOpenResources }) {
             </span>
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 tracking-tight mt-1">
-            MindPal AI Assistant 🤖
+            MindPal AI Assistant
           </h1>
           <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400">
             Empathetic AI listener providing cognitive reframing, emotional guidance, and grounding exercises.
@@ -187,7 +187,7 @@ export default function AIMentor({ onOpenResources }) {
           <div className="p-4 bg-[#FAF6EE] dark:bg-stone-900 border-b border-amber-200/60 dark:border-stone-800 flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
               <div className="w-8 h-8 rounded-xl bg-orange-600 text-white flex items-center justify-center font-bold text-xs">
-                🤖
+                <Bot className="w-4.5 h-4.5 text-white" />
               </div>
               <div>
                 <h3 className="font-heading text-xs font-bold text-stone-800 dark:text-stone-100">
@@ -215,8 +215,8 @@ export default function AIMentor({ onOpenResources }) {
                   className={`flex ${isAi ? 'justify-start' : 'justify-end'} space-x-2`}
                 >
                   {isAi && (
-                    <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-950 text-orange-700 flex items-center justify-center font-bold text-xs shrink-0 mt-1">
-                      🤖
+                    <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-950 text-orange-700 dark:text-orange-300 flex items-center justify-center font-bold text-xs shrink-0 mt-1">
+                      <Bot className="w-4 h-4 text-orange-700 dark:text-orange-300" />
                     </div>
                   )}
 
@@ -265,8 +265,8 @@ export default function AIMentor({ onOpenResources }) {
 
             {isTyping && (
               <div className="flex justify-start space-x-2">
-                <div className="w-7 h-7 rounded-xl bg-amber-100 text-orange-700 flex items-center justify-center font-bold text-xs">
-                  🤖
+                <div className="w-7 h-7 rounded-xl bg-amber-100 dark:bg-amber-950 text-orange-700 dark:text-orange-300 flex items-center justify-center font-bold text-xs shrink-0">
+                  <Bot className="w-4 h-4 text-orange-700 dark:text-orange-300 animate-pulse" />
                 </div>
                 <div className="p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 text-xs text-stone-400 flex items-center space-x-2 animate-pulse">
                   <span>MindPal AI is reflecting…</span>
@@ -406,6 +406,11 @@ export default function AIMentor({ onOpenResources }) {
                 <span>{groundingStep === groundingSteps.length - 1 ? 'Start Over 🔄' : 'Next Sense →'}</span>
               </button>
             </div>
+          </div>
+
+          {/* Interactive Anti-Anxiety Notebook Grounding & Vagal Visualizer */}
+          <div className="pt-2">
+            <GroundingVagalDiagram />
           </div>
         </div>
       )}

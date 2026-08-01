@@ -10,14 +10,16 @@ import {
   Save,
   CheckCircle2,
   Palette,
-  Check
+  Check,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { updateUserName, logOut } from '../services/auth.js';
 import { subscribeToMoodLogs, getLocalGratitudeEntries } from '../services/firestore.js';
 import { useTheme, themeOptionsList } from '../theme/ThemeContext.jsx';
 
 export default function ProfilePage({ user }) {
-  const { theme, setTheme, enableAnimation, setEnableAnimation } = useTheme();
+  const { theme, setTheme, isDarkMode, setIsDarkMode } = useTheme();
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -193,30 +195,30 @@ export default function ProfilePage({ user }) {
                 </div>
               </div>
 
-              {/* Procedural Animation Toggle */}
+              {/* Dark Theme Mode Toggle */}
               <div className="flex items-center justify-between p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50 dark:border-stone-800">
                 <div className="space-y-0.5">
                   <span className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center space-x-1">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Background Animations</span>
+                    {isDarkMode ? <Sun className="w-3.5 h-3.5 text-amber-500 animate-pulse-soft" /> : <Moon className="w-3.5 h-3.5 text-stone-600 dark:text-stone-300" />}
+                    <span>Dark Theme Mode</span>
                   </span>
                   <span className="text-[10px] text-stone-400 dark:text-stone-500 block">
-                    Procedurally-generated slow floating calming aura background.
+                    Toggle between standard light and soothing dark modes.
                   </span>
                 </div>
                 
                 <button
                   type="button"
-                  onClick={() => setEnableAnimation(!enableAnimation)}
+                  onClick={() => setIsDarkMode(!isDarkMode)}
                   className={`w-11 h-6 rounded-full transition-all relative outline-none flex items-center cursor-pointer ${
-                    enableAnimation 
+                    isDarkMode 
                       ? 'bg-orange-600' 
                       : 'bg-stone-300 dark:bg-stone-700'
                   }`}
                 >
                   <span 
                     className={`w-4.5 h-4.5 rounded-full bg-white shadow-xs absolute transition-all ${
-                      enableAnimation 
+                      isDarkMode 
                         ? 'translate-x-5.5' 
                         : 'translate-x-1'
                     }`} 
