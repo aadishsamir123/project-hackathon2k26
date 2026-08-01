@@ -394,7 +394,7 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
     profile = true,
   } = selectedModules;
 
-  // 1. Reset Mood & Gratitude Logs
+  // 1. Reset Mood & Gratitude Logs (Historical entries for previous days ONLY, so today starts fresh)
   if (mood) {
     const demoMoodLogs = [
       {
@@ -402,8 +402,8 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         emotion: "Grateful",
         intensity: 9,
         note: "Completed a 5-minute box breathing session with Serenity Corner and felt super peaceful before my morning presentation.",
-        tags: ["Daily Path", "Mindfulness"],
-        createdAt: new Date().toISOString(),
+        tags: ["Mindfulness", "Breathing"],
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
       },
       {
         id: "demo-m-2",
@@ -411,7 +411,7 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         intensity: 8,
         note: "Spent 25 minutes studying with Pomodoro technique. Drank 8 glasses of water and felt clear-headed.",
         tags: ["Hydration", "Focus"],
-        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
       },
       {
         id: "demo-m-3",
@@ -419,7 +419,7 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         intensity: 4,
         note: "Midterm revision felt heavy, but MindPal AI helped reframe my anxious thoughts step by step.",
         tags: ["Exam Stress", "MindPal AI"],
-        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
       },
       {
         id: "demo-m-4",
@@ -427,7 +427,7 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         intensity: 9,
         note: "Connected with peers on Peer Haven Wall. Shared an encouraging note and felt a warm sense of community.",
         tags: ["Community", "Support"],
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
       },
       {
         id: "demo-m-5",
@@ -435,7 +435,7 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         intensity: 8,
         note: "Took a 20-20-20 eye rest break during desk study and did 3 neck stretches.",
         tags: ["Somatic Rest", "Stretches"],
-        createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
       },
       {
         id: "demo-m-6",
@@ -443,7 +443,7 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         intensity: 8,
         note: "Reflected on past victories in my Heart Journal and prepared a healthy meal.",
         tags: ["Wellness", "Nutrition"],
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
       },
       {
         id: "demo-m-7",
@@ -451,16 +451,16 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
         intensity: 7,
         note: "Evening gratitude jar moment: enjoyed a warm cup of chamomile tea.",
         tags: ["Gratitude", "Rest"],
-        createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+        createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
       },
     ];
 
     const demoGratitudeLogs = [
-      { id: "g-1", text: "A warm cup of chamomile tea during rainy morning study", timestamp: new Date().toISOString() },
-      { id: "g-2", text: "Encouragement message received on Peer Haven Wall", timestamp: new Date(Date.now() - 86400000 * 1).toISOString() },
-      { id: "g-3", text: "10 minutes of box breathing with peaceful ambient soundscapes", timestamp: new Date(Date.now() - 86400000 * 2).toISOString() },
-      { id: "g-4", text: "A super helpful group study session with friends", timestamp: new Date(Date.now() - 86400000 * 3).toISOString() },
-      { id: "g-5", text: "A restful 8 hours of sleep without screen distractions", timestamp: new Date(Date.now() - 86400000 * 4).toISOString() },
+      { id: "g-1", text: "A warm cup of chamomile tea during rainy morning study", timestamp: new Date(Date.now() - 86400000 * 1).toISOString() },
+      { id: "g-2", text: "Encouragement message received on Peer Haven Wall", timestamp: new Date(Date.now() - 86400000 * 2).toISOString() },
+      { id: "g-3", text: "10 minutes of box breathing with peaceful ambient soundscapes", timestamp: new Date(Date.now() - 86400000 * 3).toISOString() },
+      { id: "g-4", text: "A super helpful group study session with friends", timestamp: new Date(Date.now() - 86400000 * 4).toISOString() },
+      { id: "g-5", text: "A restful 8 hours of sleep without screen distractions", timestamp: new Date(Date.now() - 86400000 * 5).toISOString() },
     ];
 
     localStorage.setItem(LOCAL_STORAGE_MOODS, JSON.stringify(demoMoodLogs));
@@ -490,14 +490,32 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
 
   // 2. Reset Physical Wellbeing
   if (physical) {
-    localStorage.setItem("mindhaven_water_count", "8");
+    localStorage.setItem("mindhaven_water_count", "0");
     localStorage.setItem("mindhaven_sleep_hours", "8.0");
     localStorage.setItem("mindhaven_sleep_quality", "Restful");
   }
 
-  // 3. Reset Anonymous Help Wall
+  // 3. Reset Anonymous Help Wall (Clear LocalStorage AND reset Firestore anonymousPosts)
   if (community) {
     localStorage.setItem(LOCAL_STORAGE_POSTS, JSON.stringify(INITIAL_ANON_POSTS));
+
+    if (db) {
+      try {
+        const postsRef = collection(db, "anonymousPosts");
+        const snap = await getDocs(postsRef);
+        const deletePromises = snap.docs.map((d) => deleteDoc(d.ref));
+        await Promise.all(deletePromises);
+
+        for (const post of INITIAL_ANON_POSTS) {
+          await addDoc(postsRef, {
+            ...post,
+            createdAt: serverTimestamp(),
+          });
+        }
+      } catch (err) {
+        console.warn("Firestore reset community posts error:", err);
+      }
+    }
   }
 
   // 4. Reset AI Chat Companion
@@ -506,11 +524,11 @@ export async function resetUserDataForDemo(uid, selectedModules = {}) {
     localStorage.removeItem("mindhaven_reframe_history");
   }
 
-  // 5. Reset User Profile & Daily Path Progress
+  // 5. Reset User Profile & Daily Path Progress (Set completion status to 0)
   if (profile) {
     localStorage.setItem(LOCAL_STORAGE_TUTORIAL, "true");
-    const fullDailyPath = ["step-1", "step-2", "step-3", "step-4", "step-5", "step-6"];
-    localStorage.setItem("mindhaven_daily_path_completed", JSON.stringify(fullDailyPath));
+    // Explicitly reset completion to 0 (empty array: 0/6 completed)
+    localStorage.setItem("mindhaven_daily_path_completed", JSON.stringify([]));
 
     if (uid && db) {
       try {

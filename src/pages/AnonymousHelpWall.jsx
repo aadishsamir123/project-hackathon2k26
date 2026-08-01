@@ -21,7 +21,7 @@ import {
 } from '../services/firestore.js';
 import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
-export default function AnonymousHelpWall() {
+export default function AnonymousHelpWall({ user }) {
   const [posts, setPosts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isPosting, setIsPosting] = useState(false);
@@ -57,7 +57,8 @@ export default function AnonymousHelpWall() {
     const updated = await createAnonymousPost({
       alias: postAlias,
       category: postCategory,
-      content: postContent.trim()
+      content: postContent.trim(),
+      authorUid: user?.uid
     });
     if (updated && Array.isArray(updated)) {
       setPosts(updated);

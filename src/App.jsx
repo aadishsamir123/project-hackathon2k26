@@ -147,7 +147,7 @@ export default function App() {
                     <Route path="calmandai/mindpal" element={<AIMentor user={user} onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
                     <Route path="calmandai/serenity" element={<SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />} />
                     <Route path="calmandai/wellness-guide" element={<WellnessGuide user={user} />} />
-                    <Route path="connect/peerhaven" element={<AnonymousHelpWall />} />
+                    <Route path="connect/peerhaven" element={<AnonymousHelpWall user={user} />} />
                     <Route path="connect/resources" element={<CrisisResources />} />
                     <Route path="*" element={<Navigate to="myspace/homehub" replace />} />
                   </Routes>
