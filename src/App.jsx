@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { onAuthChange } from './services/auth.js';
 import { syncUserProfile, checkTutorialStatus, completeTutorialFlag } from './services/firestore.js';
@@ -13,16 +13,16 @@ import GuidedTourOverlay from './components/common/GuidedTourOverlay.jsx';
 import AnimatedThemeBackground from './components/common/AnimatedThemeBackground.jsx';
 import logo from './assets/logo.png';
 
-// MindHaven Pages
-import Dashboard from './pages/Dashboard.jsx';
-import MoodTracker from './pages/MoodTracker.jsx';
-import PhysicalWellbeing from './pages/PhysicalWellbeing.jsx';
-import AnonymousHelpWall from './pages/AnonymousHelpWall.jsx';
-import AIMentor from './pages/AIMentor.jsx';
-import SerenityCorner from './pages/SerenityCorner.jsx';
-import CrisisResources from './pages/CrisisResources.jsx';
-import ProfilePage from './pages/ProfilePage.jsx';
-import WellnessGuide from './pages/WellnessGuide.jsx';
+// MindHaven Pages (Lazy-loaded for optimal bundle splitting)
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const MoodTracker = lazy(() => import('./pages/MoodTracker.jsx'));
+const PhysicalWellbeing = lazy(() => import('./pages/PhysicalWellbeing.jsx'));
+const AnonymousHelpWall = lazy(() => import('./pages/AnonymousHelpWall.jsx'));
+const AIMentor = lazy(() => import('./pages/AIMentor.jsx'));
+const SerenityCorner = lazy(() => import('./pages/SerenityCorner.jsx'));
+const CrisisResources = lazy(() => import('./pages/CrisisResources.jsx'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage.jsx'));
+const WellnessGuide = lazy(() => import('./pages/WellnessGuide.jsx'));
 
 import { useTheme } from './theme/ThemeContext.jsx';
 
@@ -137,20 +137,31 @@ export default function App() {
                   user={user}
                 />
 
-                {/* Main Content Area with React Router */}
+                {/* Main Content Area with React Router & Suspense fallback */}
                 <main className="flex-1 pb-12">
-                  <Routes>
-                    <Route path="myspace/homehub" element={<Dashboard user={user} onOpenHelp={() => setIsHelpOpen(true)} />} />
-                    <Route path="myspace/emotionlog" element={<MoodTracker user={user} />} />
-                    <Route path="myspace/physical" element={<PhysicalWellbeing user={user} />} />
-                    <Route path="profile/me" element={<ProfilePage user={user} />} />
-                    <Route path="calmandai/mindpal" element={<AIMentor user={user} onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
-                    <Route path="calmandai/serenity" element={<SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />} />
-                    <Route path="calmandai/wellness-guide" element={<WellnessGuide user={user} />} />
-                    <Route path="connect/peerhaven" element={<AnonymousHelpWall user={user} />} />
-                    <Route path="connect/resources" element={<CrisisResources />} />
-                    <Route path="*" element={<Navigate to="myspace/homehub" replace />} />
-                  </Routes>
+                  <Suspense
+                    fallback={
+                      <div className="min-h-[50vh] flex items-center justify-center py-12">
+                        <div className="flex items-center space-x-3 text-stone-500 dark:text-stone-400">
+                          <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm font-medium">Loading view...</span>
+                        </div>
+                      </div>
+                    }
+                  >
+                    <Routes>
+                      <Route path="myspace/homehub" element={<Dashboard user={user} onOpenHelp={() => setIsHelpOpen(true)} />} />
+                      <Route path="myspace/emotionlog" element={<MoodTracker user={user} />} />
+                      <Route path="myspace/physical" element={<PhysicalWellbeing user={user} />} />
+                      <Route path="profile/me" element={<ProfilePage user={user} />} />
+                      <Route path="calmandai/mindpal" element={<AIMentor user={user} onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
+                      <Route path="calmandai/serenity" element={<SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />} />
+                      <Route path="calmandai/wellness-guide" element={<WellnessGuide user={user} />} />
+                      <Route path="connect/peerhaven" element={<AnonymousHelpWall user={user} />} />
+                      <Route path="connect/resources" element={<CrisisResources />} />
+                      <Route path="*" element={<Navigate to="myspace/homehub" replace />} />
+                    </Routes>
+                  </Suspense>
                 </main>
 
                 {/* Warm Serene Footer */}
