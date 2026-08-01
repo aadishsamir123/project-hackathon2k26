@@ -73,20 +73,20 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#FAFBF9] dark:bg-slate-900 flex items-center justify-center font-sans">
+      <div className="min-h-screen bg-[#FAF6EE] dark:bg-[#1C1917] flex items-center justify-center font-serif">
         <div className="text-center space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center mx-auto text-white text-xl shadow-md animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 flex items-center justify-center mx-auto text-white text-xl shadow-md animate-pulse">
             🌿
           </div>
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">HealthHaven Student Safe Space</p>
-          <p className="text-xs text-slate-400">Loading your peaceful sanctuary…</p>
+          <p className="text-sm font-bold text-stone-800 dark:text-stone-200 font-serif">HealthHaven Sanctuary</p>
+          <p className="text-xs text-amber-800/60 dark:text-amber-200/60 italic font-serif">Opening your peaceful path…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100vh] w-full bg-[#FAFBF9] dark:bg-[#0F172A] flex flex-col font-sans text-slate-800 dark:text-slate-100 transition-colors duration-300 overflow-x-hidden">
+    <div className="min-h-[100vh] w-full bg-[#FAF6EE] dark:bg-[#1C1917] flex flex-col font-serif text-stone-800 dark:text-stone-100 transition-colors duration-500 overflow-x-hidden">
       
       {/* Global Background Ambient Sound Generator */}
       <div className="hidden">

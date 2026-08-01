@@ -1,39 +1,29 @@
 import React from 'react';
-import { PhoneCall, HeartHandshake, ShieldAlert, X } from 'lucide-react';
+import { ShieldAlert, X } from 'lucide-react';
 
 export default function CrisisBanner({ onOpenResources, onClose }) {
   return (
-    <div className="bg-gradient-to-r from-rose-500 via-rose-600 to-indigo-600 text-white text-xs py-2.5 px-4 shadow-sm relative transition-all">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-        <div className="flex items-center space-x-2 text-center sm:text-left">
-          <ShieldAlert className="w-4 h-4 text-white shrink-0 animate-pulse" />
-          <span className="font-semibold">Need immediate support or someone to talk to right now?</span>
-          <span className="hidden lg:inline text-rose-100">
-            You don't have to face distress alone. Free, confidential support is available 24/7.
+    <div className="bg-amber-950 dark:bg-stone-900 text-amber-100 text-xs py-1.5 px-4 relative transition-all border-b border-amber-800/40">
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+        <div className="flex items-center space-x-2 truncate">
+          <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0 animate-pulse" />
+          <span className="font-serif font-medium text-[11px] sm:text-xs truncate">
+            Need immediate care? 24/7 confidential student hotlines available.
           </span>
         </div>
 
-        <div className="flex items-center space-x-3 shrink-0">
-
-          <a
-            href="tel:1767"
-            className="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white font-bold transition-all"
-          >
-            <HeartHandshake className="w-3 h-3" />
-            <span>SOS (1767)</span>
-          </a>
-
+        <div className="flex items-center space-x-2 shrink-0">
           <button
             onClick={onOpenResources}
-            className="underline hover:text-rose-100 font-semibold transition-all ml-1"
+            className="text-[11px] font-serif font-bold text-amber-300 hover:text-white underline transition-all"
           >
-            All Helplines →
+            Helplines →
           </button>
 
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1 rounded-md hover:bg-white/20 text-white/80 hover:text-white transition-all ml-2"
+              className="p-1 rounded-md hover:bg-amber-900 text-amber-300/80 hover:text-white transition-all"
               title="Dismiss banner"
             >
               <X className="w-3.5 h-3.5" />

@@ -17,7 +17,11 @@ import {
   HelpCircle,
   Activity,
   Droplet,
-  Moon
+  Moon,
+  Compass,
+  PhoneCall,
+  MapPin,
+  Sparkle
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
@@ -26,30 +30,18 @@ export default function Dashboard({ user, onOpenHelp }) {
   const navigate = useNavigate();
   const [moodLogs, setMoodLogs] = useState([]);
   const [selectedQuickEmotion, setSelectedQuickEmotion] = useState(null);
-  const [quickNote, setQuickNote] = useState('');
-  const [isSavedQuick, setIsSavedQuick] = useState(false);
   const [affirmation, setAffirmation] = useState('');
-  const [loadingAffirmation, setLoadingAffirmation] = useState(false);
-  const [gratitudeText, setGratitudeText] = useState('');
   const [gratitudeLogs, setGratitudeLogs] = useState([]);
-  const [gratitudeSaved, setGratitudeSaved] = useState(false);
-  const [journalPromptIndex, setJournalPromptIndex] = useState(0);
-
-  const journalingPrompts = [
-    "What is one small thing that went well for you today?",
-    "Identify a moment you felt calm. What caused it?",
-    "Name a person you appreciate. Why are you grateful for them?",
-    "How did you show kindness to yourself today?",
-    "What is a boundary you successfully maintained today?"
-  ];
+  const [gratitudeInput, setGratitudeInput] = useState('');
+  const [showGratitudeSuccess, setShowGratitudeSuccess] = useState(false);
 
   const quickEmotions = [
-    { name: 'Joyful', emoji: '🌟', color: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800' },
-    { name: 'Calm', emoji: '🌿', color: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800' },
-    { name: 'Anxious', emoji: '🌧️', color: 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950 dark:text-indigo-300 dark:border-indigo-800' },
-    { name: 'Overwhelmed', emoji: '⚡', color: 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800' },
-    { name: 'Tired', emoji: '🌙', color: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' },
-    { name: 'Sad', emoji: '💧', color: 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950 dark:text-sky-300 dark:border-sky-800' },
+    { name: 'Joyful', emoji: '✨', color: 'bg-amber-100/80 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800' },
+    { name: 'Calm', emoji: '🌿', color: 'bg-orange-100/80 text-orange-900 border-orange-300 dark:bg-orange-950 dark:text-orange-200 dark:border-orange-800' },
+    { name: 'Anxious', emoji: '☁️', color: 'bg-stone-200/80 text-stone-900 border-stone-300 dark:bg-stone-800 dark:text-stone-200 dark:border-stone-700' },
+    { name: 'Overwhelmed', emoji: '⚡', color: 'bg-amber-200/60 text-amber-950 border-amber-400 dark:bg-amber-900 dark:text-amber-100 dark:border-amber-700' },
+    { name: 'Tired', emoji: '🌙', color: 'bg-stone-100 text-stone-800 border-stone-300 dark:bg-stone-900 dark:text-stone-300 dark:border-stone-700' },
+    { name: 'Sad', emoji: '💧', color: 'bg-orange-50 text-orange-900 border-orange-200 dark:bg-stone-800 dark:text-orange-300 dark:border-stone-700' },
   ];
 
   useEffect(() => {
@@ -71,411 +63,336 @@ export default function Dashboard({ user, onOpenHelp }) {
     const intensityMap = { Joyful: 9, Calm: 8, Anxious: 4, Overwhelmed: 3, Tired: 5, Sad: 3 };
     const newLog = {
       emotion: emotion.name,
-      emoji: emotion.emoji,
       intensity: intensityMap[emotion.name] || 5,
-      tags: ['Daily Check-in'],
-      note: quickNote || `Feeling ${emotion.name.toLowerCase()} today.`,
+      note: `Quick check-in logged from Mindful Path (${emotion.name})`,
+      tags: ['Daily Path'],
     };
+
     await saveMoodLog(user?.uid, newLog);
-    setIsSavedQuick(true);
     fetchAffirmation(emotion.name);
-    setTimeout(() => {
-      setIsSavedQuick(false);
-      setQuickNote('');
-    }, 2500);
   };
 
   const handleAddGratitude = (e) => {
     e.preventDefault();
-    if (!gratitudeText.trim()) return;
-    const updated = saveGratitudeEntry(gratitudeText.trim());
+    if (!gratitudeInput.trim()) return;
+    const updated = saveGratitudeEntry(gratitudeInput.trim());
     setGratitudeLogs(updated);
-    setGratitudeText('');
-    setGratitudeSaved(true);
-    setTimeout(() => setGratitudeSaved(false), 2000);
+    setGratitudeInput('');
+    setShowGratitudeSuccess(true);
+    setTimeout(() => setShowGratitudeSuccess(false), 3000);
   };
 
-  const recentLogs = moodLogs.slice(0, 5);
   const avgIntensity = moodLogs.length
-    ? Math.round(moodLogs.reduce((acc, curr) => acc + (curr.intensity || 5), 0) / moodLogs.length)
-    : 7;
+    ? (moodLogs.reduce((acc, curr) => acc + (curr.intensity || 5), 0) / moodLogs.length).toFixed(1)
+    : '7.5';
+
+  const waterCount = localStorage.getItem('mindhaven_water_count') || '3';
+
+  // Mindful Journey Roadmap Steps
+  const journeyPath = [
+    {
+      step: '01',
+      title: 'Heart & Emotion Check-in',
+      subtitle: 'Emotion Journal',
+      desc: 'Pause and reflect on how your heart is feeling right now. Log deep emotion ratings and private thoughts.',
+      icon: BookOpen,
+      path: '/dashboard/myspace/emotionlog',
+      tag: 'Mindful Step 1',
+      badgeColor: 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-200 border-amber-300/60'
+    },
+    {
+      step: '02',
+      title: 'Body Vitality & Rest',
+      subtitle: 'Physical Health',
+      desc: 'Track your water intake, sleep quality, and take a gentle 20-20-20 eye strain break from screens.',
+      icon: Activity,
+      path: '/dashboard/myspace/physical',
+      tag: 'Mindful Step 2',
+      badgeColor: 'bg-orange-100 dark:bg-orange-950 text-orange-900 dark:text-orange-200 border-orange-300/60'
+    },
+    {
+      step: '03',
+      title: 'Stillness & Breathing',
+      subtitle: 'Serenity Corner',
+      desc: 'Slow down your breath with guided breathing cycles and soothing warm ambient soundscapes.',
+      icon: Wind,
+      path: '/dashboard/calmandai/serenity',
+      tag: 'Mindful Step 3',
+      badgeColor: 'bg-amber-200/70 dark:bg-amber-900 text-amber-950 dark:text-amber-100 border-amber-400/60'
+    },
+    {
+      step: '04',
+      title: 'Gentle AI Companion',
+      subtitle: 'MindPal AI',
+      desc: 'Talk with an empathetic AI listener, reframe anxious thoughts, or practice 5-4-3-2-1 grounding.',
+      icon: Compass,
+      path: '/dashboard/calmandai/mindpal',
+      tag: 'Mindful Step 4',
+      badgeColor: 'bg-stone-200/80 dark:bg-stone-800 text-stone-900 dark:text-stone-200 border-stone-300'
+    },
+    {
+      step: '05',
+      title: 'Safe Community Support',
+      subtitle: 'Peer Haven Wall',
+      desc: 'Read anonymous words of encouragement from fellow students or post your own safe reflection.',
+      icon: MessageSquareHeart,
+      path: '/dashboard/connect/peerhaven',
+      tag: 'Mindful Step 5',
+      badgeColor: 'bg-orange-200/70 dark:bg-stone-800 text-orange-950 dark:text-orange-200 border-orange-300'
+    },
+    {
+      step: '06',
+      title: '24/7 Emergency Care',
+      subtitle: 'Crisis Helplines',
+      desc: 'Access free, confidential 24/7 student hotlines and professional crisis support anytime.',
+      icon: PhoneCall,
+      path: '/dashboard/connect/resources',
+      tag: 'Immediate Care',
+      badgeColor: 'bg-rose-100 dark:bg-rose-950 text-rose-900 dark:text-rose-200 border-rose-300'
+    }
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10 font-serif">
       
-      {/* Welcome & Mood Focus Banner */}
-      <div id="tour-home-hub" className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-100 dark:border-slate-800 p-6 sm:p-8 backdrop-blur-sm">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center space-x-1">
-                <Smile className="w-3.5 h-3.5 text-amber-500" />
-                <span>Student Happiness & Emotion Hub</span>
-              </span>
-              <span className="text-xs text-slate-400">
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-              </span>
-            </div>
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
-              Let's log your emotional state, {user?.displayName ? user.displayName.split(' ')[0] : 'friend'} 🌿
+      {/* Serene Warm Welcome Header */}
+      <div className="bg-gradient-to-r from-[#FFFDF8] via-[#FAF3E8] to-[#FFF9EE] dark:from-[#262220] dark:via-[#1F1C1A] dark:to-[#262220] p-8 rounded-3xl border border-amber-200/70 dark:border-stone-800 shadow-sm space-y-4 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="space-y-1">
+            <span className="px-3.5 py-1 rounded-full text-xs font-semibold bg-amber-200/60 dark:bg-amber-950/80 text-amber-950 dark:text-amber-200 border border-amber-300/50">
+              🌿 Peaceful Sanctuary Path
+            </span>
+            <h1 className="font-heading text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mt-2">
+              Welcome to your quiet space, {user?.displayName ? user.displayName.split(' ')[0] : 'Friend'}
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-              Tracking your mood regularly builds emotional awareness and resiliency. Write in your private journal, fill your Happiness Jar, or talk to MindPal AI.
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 font-serif italic max-w-xl">
+              Take a slow breath. Walk through the peaceful path below to nourish your emotional and physical wellbeing today.
             </p>
           </div>
 
-          <div className="flex items-center space-x-3 shrink-0">
-            <button
-              onClick={() => navigate('/dashboard/myspace/emotionlog')}
-              className="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all flex items-center space-x-2"
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Write Full Journal Entry</span>
-            </button>
+          <button
+            onClick={onOpenHelp}
+            className="px-4 py-2.5 rounded-2xl bg-amber-100/70 dark:bg-stone-800 hover:bg-amber-200/70 text-amber-950 dark:text-amber-200 border border-amber-300/60 dark:border-stone-700 text-xs font-serif font-bold transition-all shrink-0 flex items-center space-x-1.5"
+          >
+            <HelpCircle className="w-4 h-4 text-amber-700 dark:text-amber-300" />
+            <span>Sanctuary Guide</span>
+          </button>
+        </div>
+
+        {/* Preset Daily Affirmation Box */}
+        {affirmation && (
+          <div className="mt-4 p-5 rounded-2xl bg-amber-50/90 dark:bg-stone-900/80 border border-amber-200 dark:border-amber-900/50 text-xs sm:text-sm text-stone-800 dark:text-stone-200 leading-relaxed flex items-start space-x-3 text-left">
+            <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 block">
+                Today's Calm Reflection
+              </span>
+              <p className="whitespace-pre-line font-serif italic text-stone-700 dark:text-stone-300">
+                {affirmation}
+              </p>
+            </div>
           </div>
+        )}
+      </div>
+
+      {/* Quick Heart State Selector */}
+      <div className="bg-[#FFFDF9] dark:bg-[#262220] p-6 rounded-3xl border border-amber-200/60 dark:border-stone-800 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
+            <Heart className="w-5 h-5 text-amber-600 fill-amber-600/20" />
+            <span>How is your heart feeling right now?</span>
+          </h2>
+          {selectedQuickEmotion && (
+            <span className="text-xs text-amber-800 dark:text-amber-300 font-serif italic">
+              Logged: {selectedQuickEmotion} ✓
+            </span>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-6 gap-2.5">
+          {quickEmotions.map((emo) => (
+            <button
+              key={emo.name}
+              onClick={() => handleQuickCheckin(emo)}
+              className={`p-3 rounded-2xl border transition-all text-center flex flex-col items-center space-y-1.5 ${
+                selectedQuickEmotion === emo.name
+                  ? 'ring-2 ring-amber-600 scale-105 bg-amber-100 dark:bg-amber-950 font-bold'
+                  : 'bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/60 dark:border-stone-700 hover:bg-amber-100/50 dark:hover:bg-stone-750'
+              }`}
+            >
+              <span className="text-2xl">{emo.emoji}</span>
+              <span className="text-xs font-serif text-stone-800 dark:text-stone-200 font-medium">
+                {emo.name}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Main Grid Experience */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left 2 Columns: Main Mood Tracker & Reflective Journal Prompt */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Quick Check-in with Journal Prompts */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-heading text-base font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
-                  <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
-                  <span>How is your heart today?</span>
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Select an emotion and answer the prompt below to add to your private mental health journal.
-                </p>
-              </div>
-
-              {isSavedQuick && (
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1 animate-fadeIn">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Journal entry saved!</span>
-                </span>
-              )}
-            </div>
-
-            {/* Quick Emotion Picker */}
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 pt-1">
-              {quickEmotions.map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => handleQuickCheckin(item)}
-                  className={`p-3.5 rounded-2xl border flex flex-col items-center justify-center space-y-1.5 transition-all duration-200 hover:scale-105 ${
-                    selectedQuickEmotion === item.name
-                      ? item.color + ' shadow-xs ring-2 ring-emerald-500/50'
-                      : 'bg-slate-50/70 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-                  }`}
-                >
-                  <span className="text-2xl">{item.emoji}</span>
-                  <span className="text-xs font-semibold">{item.name}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Guided Journaling Prompts Card */}
-            <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/60 dark:border-slate-700 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-[11px] font-bold text-indigo-700 dark:text-indigo-300 uppercase tracking-wider flex items-center space-x-1">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>Mental Health Writing Prompt</span>
-                </span>
-                <button
-                  onClick={() => setJournalPromptIndex((prev) => (prev + 1) % journalingPrompts.length)}
-                  className="text-[10px] text-indigo-600 dark:text-indigo-400 hover:underline"
-                >
-                  Next Prompt →
-                </button>
-              </div>
-              <p className="text-xs font-semibold text-slate-800 dark:text-slate-100 italic">
-                "{journalingPrompts[journalPromptIndex]}"
-              </p>
-              <input
-                type="text"
-                value={quickNote}
-                onChange={(e) => setQuickNote(e.target.value)}
-                placeholder="Write your response here..."
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-              />
-            </div>
-          </div>
-
-          {/* AI Positive Calm Affirmation */}
-          <div className="bg-gradient-to-br from-indigo-50/70 via-purple-50/50 to-emerald-50/60 dark:from-indigo-950/40 dark:via-purple-950/30 dark:to-emerald-950/40 border border-indigo-100 dark:border-slate-800 rounded-3xl p-6 relative overflow-hidden shadow-xs">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-heading text-xs font-bold text-indigo-900 dark:text-indigo-200">
-                    Daily Affirmation
-                  </h4>
-                  <p className="text-[10px] text-indigo-600/80 dark:text-indigo-300/80">
-                    Mental wellness support and grounding prompts
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => fetchAffirmation(selectedQuickEmotion || 'Calm')}
-                disabled={loadingAffirmation}
-                className="p-1.5 rounded-xl bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-300 border border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 text-xs transition-all flex items-center space-x-1"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loadingAffirmation ? 'animate-spin' : ''}`} />
-                <span className="text-[11px] font-medium hidden sm:inline">Refresh</span>
-              </button>
-            </div>
-
-            <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-serif italic py-1">
-              {loadingAffirmation ? (
-                <div className="py-4 text-center text-slate-400 text-xs font-sans">
-                  Crafting comfort for you…
-                </div>
-              ) : (
-                affirmation || 'You are allowed to take things one step at a time. Rest is an essential part of your growth.'
-              )}
-            </div>
-          </div>
-
-          {/* Quick Action Navigation Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div
-              onClick={() => navigate('/dashboard/myspace/emotionlog')}
-              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer group shadow-xs space-y-2"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <BookOpen className="w-5 h-5" />
-              </div>
-              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
-                <span>Emotion Journal</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Log deep emotion ratings, add context tags, and view weekly graphs.
-              </p>
-            </div>
-
-            <div
-              onClick={() => navigate('/dashboard/myspace/physical')}
-              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-sky-400 dark:hover:border-sky-600 transition-all cursor-pointer group shadow-xs space-y-2"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Activity className="w-5 h-5" />
-              </div>
-              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
-                <span>Physical Vitality</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Hydration log, sleep quality, 20-20-20 eye rest & study stretches.
-              </p>
-            </div>
-
-            <div
-              onClick={() => navigate('/dashboard/calmandai/mindpal')}
-              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all cursor-pointer group shadow-xs space-y-2"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
-                <span>MindPal AI</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Empathetic chat assistant, CBT Thought Reframer, and grounding tools.
-              </p>
-            </div>
-
-            <div
-              onClick={() => navigate('/dashboard/calmandai/serenity')}
-              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-teal-400 dark:hover:border-teal-600 transition-all cursor-pointer group shadow-xs space-y-2"
-            >
-              <div className="w-10 h-10 rounded-2xl bg-teal-100 dark:bg-teal-950 text-teal-600 dark:text-teal-300 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Wind className="w-5 h-5" />
-              </div>
-              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
-                <span>Serenity Corner</span>
-                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
-              </h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Animated breathing exercise cycles and soothing ambient soundscapes.
-              </p>
-            </div>
-          </div>
-
+      {/* 🛣️ THE MINDFUL PATHWAY (Walkthrough Journey) */}
+      <div className="space-y-6">
+        <div className="text-center space-y-1">
+          <span className="px-3 py-1 rounded-full text-xs font-serif font-semibold bg-amber-200/50 dark:bg-amber-950/60 text-amber-950 dark:text-amber-200">
+            Guided Wellness Journey
+          </span>
+          <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100">
+            The Path of Stillness & Vitality
+          </h2>
+          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 italic">
+            Walk through each station along your personal path at your own peaceful pace.
+          </p>
         </div>
 
-        {/* Right 1 Column: Stats, Happiness Jar, Recent Entries */}
-        <div className="space-y-6">
-          
-          {/* Mental Health Stats Panel */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
-            <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
-              <TrendingUp className="w-4 h-4 text-emerald-500" />
-              <span>Emotional Wellbeing Score</span>
-            </h3>
+        {/* Connected Journey Line & Stations */}
+        <div className="relative space-y-6 before:absolute before:left-6 sm:before:left-1/2 before:top-4 before:bottom-4 before:w-0.5 before:bg-gradient-to-b before:from-amber-400 before:via-orange-300 before:to-rose-400 before:-translate-x-1/2 before:hidden sm:before:block">
+          {journeyPath.map((station, idx) => {
+            const Icon = station.icon;
+            const isEven = idx % 2 === 0;
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Journal Entries</p>
-                <p className="text-xl font-extrabold text-slate-800 dark:text-slate-100 mt-1">
-                  {moodLogs.length}
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Happiness Index</p>
-                <p className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
-                  {avgIntensity} / 10
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 text-xs text-emerald-800 dark:text-emerald-300 flex items-center space-x-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Consistency Streak: <strong>{moodLogs.length ? 'Active 🔥' : 'Start Log Today 🌿'}</strong></span>
-            </div>
-          </div>
-
-          {/* Physical Health Summary Panel */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
-                <Activity className="w-4 h-4 text-sky-500" />
-                <span>Physical Vitality</span>
-              </h3>
-              <button
-                onClick={() => navigate('/dashboard/myspace/physical')}
-                className="text-[11px] text-sky-600 dark:text-sky-400 font-semibold hover:underline"
+            return (
+              <div
+                key={station.step}
+                onClick={() => navigate(station.path)}
+                className={`relative flex flex-col sm:flex-row items-center cursor-pointer group ${
+                  isEven ? 'sm:flex-row-reverse' : ''
+                }`}
               >
-                Track & Stretch →
-              </button>
+                {/* Station Card */}
+                <div className="w-full sm:w-[46%] bg-[#FFFDF9] dark:bg-[#262220] p-6 rounded-3xl border border-amber-200/70 dark:border-stone-800 shadow-sm group-hover:border-amber-400 dark:group-hover:border-amber-600 transition-all duration-300 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className={`px-3 py-0.5 rounded-full text-[11px] font-bold border font-serif ${station.badgeColor}`}>
+                      {station.tag}
+                    </span>
+                    <span className="text-xs font-extrabold font-mono text-amber-800/50 dark:text-amber-200/40">
+                      STEP {station.step}
+                    </span>
+                  </div>
+
+                  <div className="flex items-start space-x-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-100/80 dark:bg-amber-950 text-amber-900 dark:text-amber-200 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading text-base font-bold text-stone-900 dark:text-stone-100 font-serif flex items-center space-x-1.5">
+                        <span>{station.title}</span>
+                        <ArrowRight className="w-4 h-4 text-amber-600 dark:text-amber-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      </h3>
+                      <p className="text-xs text-amber-800/70 dark:text-amber-200/60 font-serif italic mt-0.5">
+                        {station.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed font-serif">
+                    {station.desc}
+                  </p>
+                </div>
+
+                {/* Center Node Marker on Path */}
+                <div className="hidden sm:flex z-10 w-10 h-10 rounded-full bg-amber-500 text-white font-extrabold text-xs items-center justify-center shadow-lg shadow-amber-500/30 border-4 border-[#FAF6EE] dark:border-[#1C1917] group-hover:scale-125 transition-transform duration-300 shrink-0 mx-auto">
+                  {station.step}
+                </div>
+
+                {/* Empty Spacer Column for layout symmetry */}
+                <div className="hidden sm:block w-[46%]" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Peaceful Stats & Happiness Jar Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Wellbeing Metrics Panel */}
+        <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-4">
+          <h3 className="font-heading text-base font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2 font-serif">
+            <TrendingUp className="w-4 h-4 text-amber-600" />
+            <span>Wellbeing Summary</span>
+          </h3>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-stone-900 border border-amber-200/50 dark:border-stone-800">
+              <p className="text-[10px] text-amber-900/70 dark:text-amber-200/60 font-serif">Happiness Index</p>
+              <p className="text-2xl font-extrabold text-amber-800 dark:text-amber-300 mt-1 font-serif">
+                {avgIntensity} / 10
+              </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3.5 rounded-2xl bg-sky-50/60 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40">
-                <div className="flex items-center space-x-1 text-[10px] text-sky-700 dark:text-sky-300 font-bold">
-                  <Droplet className="w-3.5 h-3.5 fill-current" />
-                  <span>Hydration</span>
-                </div>
-                <p className="text-lg font-extrabold text-sky-700 dark:text-sky-300 mt-1">
-                  {localStorage.getItem('mindhaven_water_count') || '3'} / 8 <span className="text-[10px] font-normal">cups</span>
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
-                <div className="flex items-center space-x-1 text-[10px] text-indigo-700 dark:text-indigo-300 font-bold">
-                  <Moon className="w-3.5 h-3.5" />
-                  <span>Sleep Log</span>
-                </div>
-                <p className="text-lg font-extrabold text-indigo-700 dark:text-indigo-300 mt-1">
-                  7.5 <span className="text-[10px] font-normal">hours</span>
-                </p>
-              </div>
+            <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-stone-900 border border-amber-200/50 dark:border-stone-800">
+              <p className="text-[10px] text-amber-900/70 dark:text-amber-200/60 font-serif">Hydration Log</p>
+              <p className="text-2xl font-extrabold text-amber-800 dark:text-amber-300 mt-1 font-serif">
+                {waterCount} / 8 <span className="text-xs font-normal">cups</span>
+              </p>
             </div>
           </div>
 
-          {/* Happiness Jar (Gratitude Collection) */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
-                  <Smile className="w-4 h-4 text-amber-500" />
-                  <span>Happiness Jar 🍯</span>
-                </h3>
-                <p className="text-[10px] text-slate-400 mt-0.5">Collect small moments of joy</p>
-              </div>
-              
-              <div className="w-8 h-8 rounded-full bg-amber-50 dark:bg-amber-950 flex items-center justify-center text-xs font-bold text-amber-600">
-                {gratitudeLogs.length}
-              </div>
-            </div>
+          <div className="p-3.5 rounded-2xl bg-amber-100/50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/50 text-xs text-amber-950 dark:text-amber-200 flex items-center space-x-2 font-serif">
+            <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+            <span>Consistency Streak: <strong>{moodLogs.length ? 'Active 🔥' : 'Start Your Path Today 🌿'}</strong></span>
+          </div>
+        </div>
 
-            {/* Gratitude input form */}
-            <form onSubmit={handleAddGratitude} className="space-y-2">
+        {/* Happiness Jar (Gratitude Collection) */}
+        <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-heading text-base font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2 font-serif">
+              <Sun className="w-4 h-4 text-amber-600" />
+              <span>Happiness Jar</span>
+            </h3>
+            <span className="text-xs text-amber-800 dark:text-amber-300 font-serif italic">
+              {gratitudeLogs.length} Memories Saved
+            </span>
+          </div>
+
+          <form onSubmit={handleAddGratitude} className="space-y-2">
+            <div className="flex items-center space-x-2">
               <input
                 type="text"
-                value={gratitudeText}
-                onChange={(e) => setGratitudeText(e.target.value)}
-                placeholder="What is 1 tiny thing you're grateful for today?"
-                className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                value={gratitudeInput}
+                onChange={(e) => setGratitudeInput(e.target.value)}
+                placeholder="Drop a small happy memory or gratitude..."
+                className="flex-1 bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/80 dark:border-stone-700 rounded-2xl px-4 py-2.5 text-xs text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500/40 font-serif"
               />
               <button
                 type="submit"
-                className="w-full py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition-all shadow-xs flex items-center justify-center space-x-1"
+                disabled={!gratitudeInput.trim()}
+                className="p-2.5 rounded-2xl bg-amber-700 hover:bg-amber-800 disabled:opacity-40 text-white font-bold transition-all shadow-xs shrink-0"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add to Happiness Jar</span>
+                <Plus className="w-4 h-4" />
               </button>
-            </form>
+            </div>
+            {showGratitudeSuccess && (
+              <p className="text-[11px] text-amber-800 dark:text-amber-300 font-serif italic">
+                ✨ Added to your Happiness Jar!
+              </p>
+            )}
+          </form>
 
-            {/* Gratitude log list */}
-            <div className="space-y-1.5 pt-2 max-h-36 overflow-y-auto">
-              {gratitudeLogs.slice(0, 3).map((item) => (
+          {/* Gratitude Notes */}
+          <div className="space-y-2 max-h-32 overflow-y-auto pr-1">
+            {gratitudeLogs.length === 0 ? (
+              <div className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900/60 text-center text-xs text-stone-400 font-serif italic">
+                Your Happiness Jar is ready for your first joyful memory 🌿
+              </div>
+            ) : (
+              gratitudeLogs.slice(0, 3).map((item) => (
                 <div
                   key={item.id}
-                  className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 italic"
+                  className="p-3 rounded-2xl bg-amber-50/60 dark:bg-stone-900 border border-amber-100 dark:border-stone-800 text-xs text-stone-700 dark:text-stone-300 font-serif flex items-center justify-between"
                 >
-                  " {item.text} "
+                  <span className="truncate pr-2">"{item.text}"</span>
+                  <span className="text-[10px] text-amber-800/50 dark:text-amber-300/40 shrink-0 font-mono">
+                    {item.date}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Private Journal Log list */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100">
-                Recent Journal Logs
-              </h3>
-              <button
-                onClick={() => navigate('/dashboard/myspace/emotionlog')}
-                className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
-              >
-                View History
-              </button>
-            </div>
-
-            {recentLogs.length === 0 ? (
-              <p className="text-xs text-slate-400 italic text-center py-4">
-                No entries logged yet. Answer the prompt above!
-              </p>
-            ) : (
-              <div className="space-y-2">
-                {recentLogs.map((log, idx) => (
-                  <div
-                    key={idx}
-                    className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs"
-                  >
-                    <div className="flex items-center space-x-2.5">
-                      <span className="text-lg">{log.emoji || '🌿'}</span>
-                      <div>
-                        <p className="font-bold text-slate-800 dark:text-slate-100">{log.emotion}</p>
-                        <p className="text-[10px] text-slate-400 truncate max-w-[140px]">{log.note}</p>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-                      {log.intensity}/10
-                    </span>
-                  </div>
-                ))}
-              </div>
+              ))
             )}
           </div>
-
         </div>
 
       </div>
+
     </div>
   );
 }
