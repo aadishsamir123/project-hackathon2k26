@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, Volume2, Sparkles, Clock, CheckCircle2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Volume2, VolumeX, Sparkles, Clock, CheckCircle2 } from 'lucide-react';
 
 export default function MicroMeditationCards() {
   const [activeMeditationId, setActiveMeditationId] = useState(null);
@@ -10,6 +10,7 @@ export default function MicroMeditationCards() {
   const audioCtxRef = useRef(null);
   const osc1Ref = useRef(null);
   const osc2Ref = useRef(null);
+  const osc3Ref = useRef(null);
   const gainNodeRef = useRef(null);
   const timerIntervalRef = useRef(null);
 
@@ -22,7 +23,6 @@ export default function MicroMeditationCards() {
       tag: 'Academic Stress',
       freq1: 216, // A3 216Hz
       freq2: 432, // A4 432Hz harmonic
-      bg: 'from-orange-500 to-amber-600',
       description: 'Slow down racing thoughts before a test or high-stakes presentation.',
       steps: [
         { time: 0, text: "Place both feet flat on the floor. Unclench your jaw and rest your hands on your lap." },
@@ -40,7 +40,6 @@ export default function MicroMeditationCards() {
       tag: 'Sleep Recovery',
       freq1: 174, // Solfeggio 174Hz deep relaxing
       freq2: 528, // 528Hz transformation tone
-      bg: 'from-amber-600 to-amber-700',
       description: 'Drift away from textbook stress into deep, restorative sleep.',
       steps: [
         { time: 0, text: "Lie back in a comfortable position. Allow your eyelids to grow heavy and close." },
@@ -58,7 +57,6 @@ export default function MicroMeditationCards() {
       tag: 'Anxiety Reset',
       freq1: 285,
       freq2: 396,
-      bg: 'from-orange-600 to-amber-500',
       description: 'Rapid sensory grounding for sudden overwhelm or anxiety spikes.',
       steps: [
         { time: 0, text: "Take one deep breath in... and let it out with a soft sigh." },
@@ -75,7 +73,6 @@ export default function MicroMeditationCards() {
       tag: 'Mindful Care',
       freq1: 396,
       freq2: 432,
-      bg: 'from-amber-500 to-orange-500',
       description: 'Release self-criticism, academic burnout, and imposter thoughts.',
       steps: [
         { time: 0, text: "Place a hand over your heart. Feel the steady rhythm of your breathing." },
@@ -86,63 +83,97 @@ export default function MicroMeditationCards() {
     }
   ];
 
-  // Stop web audio synthesis
+  // Speak text using Web Speech API
+  const speakText = (text) => {
+    if ('speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel(); // Stop previous voice speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.88; // Calm meditation pace
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        window.speechSynthesis.speak(utterance);
+      } catch (e) {
+        console.warn("Speech synthesis error:", e);
+      }
+    }
+  };
+
+  // Stop web audio synthesis & speech
   const stopAudio = () => {
+    if ('speechSynthesis' in window) {
+      try { window.speechSynthesis.cancel(); } catch (e) {}
+    }
+
     try {
       if (gainNodeRef.current && audioCtxRef.current) {
-        gainNodeRef.current.gain.setTargetAtTime(0.0001, audioCtxRef.current.currentTime, 0.2);
+        gainNodeRef.current.gain.setTargetAtTime(0.0001, audioCtxRef.current.currentTime, 0.1);
       }
       setTimeout(() => {
         if (osc1Ref.current) { osc1Ref.current.stop(); osc1Ref.current.disconnect(); osc1Ref.current = null; }
         if (osc2Ref.current) { osc2Ref.current.stop(); osc2Ref.current.disconnect(); osc2Ref.current = null; }
+        if (osc3Ref.current) { osc3Ref.current.stop(); osc3Ref.current.disconnect(); osc3Ref.current = null; }
         if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
           audioCtxRef.current.close();
           audioCtxRef.current = null;
         }
-      }, 250);
+      }, 150);
     } catch (e) {
       console.warn("Stop audio warning:", e);
     }
   };
 
-  // Start web audio ambient synthesis
-  const startAudio = (meditation) => {
+  // Start web audio ambient synthesis with explicit AudioContext resume
+  const startAudio = async (meditation) => {
     stopAudio();
     try {
       const AudioCtx = window.AudioContext || window.webkitAudioContext;
       const ctx = new AudioCtx();
+      
+      // Explicitly resume AudioContext for browser user-gesture policy
+      if (ctx.state === 'suspended') {
+        await ctx.resume();
+      }
       audioCtxRef.current = ctx;
 
       const gain = ctx.createGain();
       gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 2.5);
+      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 1.0);
       gainNodeRef.current = gain;
 
-      // Soft ambient tone 1
+      // Soft ambient tone 1 (Sine)
       const osc1 = ctx.createOscillator();
       osc1.type = 'sine';
       osc1.frequency.setValueAtTime(meditation.freq1, ctx.currentTime);
 
-      // Harmonious ambient tone 2
+      // Harmonious ambient tone 2 (Triangle)
       const osc2 = ctx.createOscillator();
       osc2.type = 'triangle';
       osc2.frequency.setValueAtTime(meditation.freq2, ctx.currentTime);
 
+      // Sub-bass warmth tone 3 (Sine)
+      const osc3 = ctx.createOscillator();
+      osc3.type = 'sine';
+      osc3.frequency.setValueAtTime(meditation.freq1 / 2, ctx.currentTime);
+
       osc1.connect(gain);
       osc2.connect(gain);
+      osc3.connect(gain);
       gain.connect(ctx.destination);
 
       osc1.start();
       osc2.start();
+      osc3.start();
 
       osc1Ref.current = osc1;
       osc2Ref.current = osc2;
+      osc3Ref.current = osc3;
     } catch (e) {
-      console.warn("Web audio synth warning:", e);
+      console.warn("Web audio synth error:", e);
     }
   };
 
-  const handleTogglePlay = (meditation) => {
+  const handleTogglePlay = async (meditation) => {
     if (activeMeditationId === meditation.id && isPlaying) {
       // Pause current
       setIsPlaying(false);
@@ -152,12 +183,16 @@ export default function MicroMeditationCards() {
       // Start or Resume
       setActiveMeditationId(meditation.id);
       setIsPlaying(true);
-      if (activeMeditationId !== meditation.id) {
-        setSecondsRemaining(meditation.duration);
-        setCurrentStepIndex(0);
-      }
+      
+      const newSec = activeMeditationId !== meditation.id ? meditation.duration : secondsRemaining;
+      setSecondsRemaining(newSec);
 
-      startAudio(meditation);
+      const initialStepIdx = meditation.steps.findLastIndex((s) => (meditation.duration - newSec) >= s.time);
+      const stepToUse = initialStepIdx !== -1 ? initialStepIdx : 0;
+      setCurrentStepIndex(stepToUse);
+
+      await startAudio(meditation);
+      speakText(meditation.steps[stepToUse].text);
 
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
 
@@ -177,16 +212,17 @@ export default function MicroMeditationCards() {
 
   const activeMeditation = meditations.find((m) => m.id === activeMeditationId);
 
-  // Sync step transcript with timer
+  // Sync step transcript & spoken voice with timer
   useEffect(() => {
     if (activeMeditation && isPlaying) {
       const elapsed = activeMeditation.duration - secondsRemaining;
       const stepIdx = activeMeditation.steps.findLastIndex((s) => elapsed >= s.time);
-      if (stepIdx !== -1) {
+      if (stepIdx !== -1 && stepIdx !== currentStepIndex) {
         setCurrentStepIndex(stepIdx);
+        speakText(activeMeditation.steps[stepIdx].text);
       }
     }
-  }, [secondsRemaining, activeMeditation, isPlaying]);
+  }, [secondsRemaining, activeMeditation, isPlaying, currentStepIndex]);
 
   useEffect(() => {
     return () => {
@@ -216,7 +252,7 @@ export default function MicroMeditationCards() {
           </h2>
         </div>
         <span className="text-xs text-stone-400 font-medium">
-          Quick 1 to 3-Minute Resets
+          Audio & Spoken Voice Guidance
         </span>
       </div>
 
@@ -226,7 +262,7 @@ export default function MicroMeditationCards() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-2xl bg-orange-600 text-white flex items-center justify-center font-bold shrink-0">
-                {isPlaying ? <Volume2 className="w-5 h-5 animate-pulse" /> : <Pause className="w-5 h-5" />}
+                {isPlaying ? <Volume2 className="w-5 h-5 animate-pulse" /> : <VolumeX className="w-5 h-5" />}
               </div>
               <div>
                 <h3 className="font-heading text-sm font-bold text-amber-950 dark:text-amber-100">
