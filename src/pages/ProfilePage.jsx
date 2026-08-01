@@ -129,16 +129,6 @@ export default function ProfilePage({ user }) {
 
   const isDebugMode = userDoc?.debug === true || userDoc?.debug === 'true';
 
-  const handleToggleDebugMode = async () => {
-    if (!user?.uid || isTogglingDebug) return;
-    setIsTogglingDebug(true);
-    const nextVal = !isDebugMode;
-    await setUserDebugFlag(user.uid, nextVal);
-    const updatedDoc = await getUserProfile(user.uid);
-    if (updatedDoc) setUserDoc(updatedDoc);
-    setIsTogglingDebug(false);
-  };
-
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       
@@ -343,42 +333,34 @@ export default function ProfilePage({ user }) {
             </div>
           </div>
 
-          {/* Hackathon Demo & Debug Controls (Rendered if Firestore debug===true or toggle enabled) */}
-          <div className="bg-gradient-to-br from-[#FFFDF9] to-amber-50/70 dark:from-[#262220] dark:to-stone-900 rounded-3xl p-6 border-2 border-orange-400/80 dark:border-orange-600/80 shadow-md space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-orange-600 text-white flex items-center justify-center font-bold shadow-xs">
-                  <Wrench className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <h3 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
-                    <span>Hackathon Demo & Debug Settings</span>
-                    {isDebugMode ? (
+          {/* Hackathon Demo & Debug Controls (Only rendered for accounts with debug=true in Firestore database) */}
+          {isDebugMode && (
+            <div className="bg-gradient-to-br from-[#FFFDF9] to-amber-50/70 dark:from-[#262220] dark:to-stone-900 rounded-3xl p-6 border-2 border-orange-400/80 dark:border-orange-600/80 shadow-md space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-9 h-9 rounded-2xl bg-orange-600 text-white flex items-center justify-center font-bold shadow-xs">
+                    <Wrench className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
+                      <span>Hackathon Demo & Debug Settings</span>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-200 font-extrabold border border-orange-300 dark:border-orange-800">
-                        debug=true (Active)
+                        Firestore debug=true
                       </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
-                        debug=false
-                      </span>
-                    )}
-                  </h3>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                    {isDebugMode
-                      ? "Firestore document debug flag active for your user account."
-                      : "Set debug=true in Firestore or toggle below to activate the demo reset modal."}
-                  </p>
+                    </h3>
+                    <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                      Authorized debug account detected in Firestore database.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {isDebugMode ? (
               <div className="space-y-3 pt-1 border-t border-amber-200/60 dark:border-stone-800">
-                <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed font-serif">
+                <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed font-sans">
                   Click <strong>"Reset Data for Demo"</strong> to open the interactive checkbox menu. Select which portal modules to reset and fill with prefilled demo data for hackathon presentation.
                 </p>
 
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-start pt-1">
                   <button
                     onClick={() => setIsDemoModalOpen(true)}
                     className="px-5 py-2.5 rounded-2xl bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs transition-all shadow-md flex items-center space-x-2 cursor-pointer"
@@ -386,31 +368,10 @@ export default function ProfilePage({ user }) {
                     <RotateCcw className="w-4 h-4" />
                     <span>Reset Data for Demo</span>
                   </button>
-
-                  <button
-                    onClick={handleToggleDebugMode}
-                    disabled={isTogglingDebug}
-                    className="text-[11px] font-semibold text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 underline cursor-pointer"
-                  >
-                    {isTogglingDebug ? 'Updating...' : 'Set debug=false'}
-                  </button>
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center justify-between pt-2 border-t border-amber-200/60 dark:border-stone-800">
-                <span className="text-xs text-stone-600 dark:text-stone-400 font-serif">
-                  Need to reset data for presentation? Enable debug mode:
-                </span>
-                <button
-                  onClick={handleToggleDebugMode}
-                  disabled={isTogglingDebug}
-                  className="px-4 py-2 rounded-xl bg-orange-100 dark:bg-orange-950 text-orange-900 dark:text-orange-200 border border-orange-300 dark:border-orange-800 text-xs font-bold hover:bg-orange-200 transition-all cursor-pointer"
-                >
-                  {isTogglingDebug ? 'Activating...' : 'Enable debug=true in Firestore'}
-                </button>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
         </div>
 
