@@ -13,6 +13,7 @@ import {
   Pause
 } from 'lucide-react';
 import { markDailyPathStepCompleted } from '../services/firestore.js';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function PhysicalWellbeing({ user }) {
   // Hydration state

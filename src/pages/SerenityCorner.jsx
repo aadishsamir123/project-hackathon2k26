@@ -9,6 +9,7 @@ import {
 import AmbientSoundPlayer from '../components/common/AmbientSoundPlayer.jsx';
 import MicroMeditationCards from '../components/common/MicroMeditationCards.jsx';
 import { markDailyPathStepCompleted } from '../services/firestore.js';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [breathingTechnique, setBreathingTechnique] = useState('478'); // '478', 'box', 'equal'
