@@ -204,14 +204,14 @@ export default function Dashboard({ user, onOpenHelp }) {
             <button
               key={emo.name}
               onClick={() => handleQuickCheckin(emo)}
-              className={`p-2.5 rounded-2xl border transition-all text-center flex flex-col items-center space-y-1 ${
+              className={`p-2.5 rounded-2xl border transition-all text-center flex flex-col items-center space-y-1 cursor-pointer ${
                 selectedQuickEmotion === emo.name
-                  ? 'bg-amber-100 dark:bg-amber-950 border-orange-500 font-bold'
-                  : 'bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/60 dark:border-stone-700 hover:bg-amber-50'
+                  ? 'bg-amber-100 dark:bg-amber-950 border-orange-500 font-bold text-orange-950 dark:text-orange-200'
+                  : 'bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/60 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-700'
               }`}
             >
               <span className="text-xl">{emo.emoji}</span>
-              <span className="text-xs text-stone-700 dark:text-stone-300">{emo.name}</span>
+              <span className="text-xs text-stone-700 dark:text-stone-300 font-sans">{emo.name}</span>
             </button>
           ))}
         </div>

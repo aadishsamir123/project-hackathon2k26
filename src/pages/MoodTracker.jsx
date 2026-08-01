@@ -132,8 +132,8 @@ export default function MoodTracker({ user }) {
                     onClick={() => handleSelectEmotion(emo)}
                     className={`p-2.5 rounded-2xl border text-center transition-all flex flex-col items-center space-y-1 ${
                       selectedEmotion === emo.name
-                        ? 'bg-amber-100 dark:bg-amber-950 border-orange-500 font-bold scale-105'
-                        : 'bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/50 text-stone-600 dark:text-stone-300 hover:bg-amber-50'
+                        ? 'bg-amber-100 dark:bg-amber-950 border-orange-500 font-bold scale-105 text-orange-950 dark:text-orange-200'
+                        : 'bg-[#FAF6EE] dark:bg-stone-800 border-amber-200/50 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-700'
                     }`}
                   >
                     <span className="text-xl">{emo.emoji}</span>
@@ -175,7 +175,7 @@ export default function MoodTracker({ user }) {
                       className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                         isSel
                           ? 'bg-orange-600 text-white font-bold'
-                          : 'bg-[#FAF6EE] dark:bg-stone-800 border border-amber-200/50 text-stone-600 dark:text-stone-300 hover:bg-amber-50'
+                          : 'bg-[#FAF6EE] dark:bg-stone-800 border border-amber-200/50 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-700'
                       }`}
                     >
                       {tag}

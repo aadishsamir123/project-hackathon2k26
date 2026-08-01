@@ -247,7 +247,7 @@ export default function DuolingoDailyPath({ user }) {
                   completed
                     ? 'bg-emerald-700 text-emerald-100'
                     : unlocked
-                    ? 'bg-stone-900 text-white dark:bg-white dark:text-stone-900'
+                    ? 'bg-stone-900 text-white dark:bg-amber-400 dark:text-stone-950 font-extrabold'
                     : 'bg-stone-300 dark:bg-stone-700 text-stone-600 dark:text-stone-400'
                 }`}>
                   {step.num}
