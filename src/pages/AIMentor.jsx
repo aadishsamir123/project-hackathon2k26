@@ -27,16 +27,32 @@ export default function AIMentor({ user, onOpenResources }) {
   const [journalLogs, setJournalLogs] = useState([]);
   const [useJournalContext, setUseJournalContext] = useState(true);
   
+  const userName = user?.displayName ? user.displayName.split(' ')[0] : user?.email ? user.email.split('@')[0] : 'Friend';
+
   // Chat state
   const [chatMessages, setChatMessages] = useState([
     {
       sender: 'ai',
-      text: "Hello friend 👋 I'm **MindPal**, your warm AI mental health companion. How are you feeling today? Whether it's exam pressure, feeling overwhelmed, or just needing a listening ear, I'm here for you.",
+      text: `Hello ${user?.displayName ? user.displayName.split(' ')[0] : 'friend'} 👋 I'm **MindPal**, your warm AI mental health companion. How are you feeling today? Whether it's exam pressure, feeling overwhelmed, or just needing a listening ear, I'm here for you.`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+
+  // Update initial AI greeting when user profile loads if chat has not progressed
+  useEffect(() => {
+    if (user?.displayName && chatMessages.length === 1 && chatMessages[0].sender === 'ai') {
+      const name = user.displayName.split(' ')[0];
+      setChatMessages([
+        {
+          sender: 'ai',
+          text: `Hello ${name} 👋 I'm **MindPal**, your warm AI mental health companion. How are you feeling today? Whether it's exam pressure, feeling overwhelmed, or just needing a listening ear, I'm here for you.`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }
+      ]);
+    }
+  }, [user]);
 
   // Thought Reframer state
   const [anxiousThought, setAnxiousThought] = useState('');
@@ -108,7 +124,7 @@ export default function AIMentor({ user, onOpenResources }) {
       const matchesCrisis = crisisKeywords.some((k) => userText.toLowerCase().includes(k));
 
       const journalContext = useJournalContext ? buildJournalContext(journalLogs) : '';
-      const response = await getEmpatheticCounselorResponse(userText, 'Student Chat', newChat, journalContext);
+      const response = await getEmpatheticCounselorResponse(userText, 'Student Chat', newChat, journalContext, userName);
 
       setChatMessages([
         ...newChat,
@@ -125,7 +141,7 @@ export default function AIMentor({ user, onOpenResources }) {
         ...newChat,
         {
           sender: 'ai',
-          text: "I hear you, and what you're feeling is valid. Take a slow, deep breath in and out. I'm right here with you. How can I best support you in this moment?",
+          text: `I hear you, ${userName}, and what you're feeling is valid. Take a slow, deep breath in and out. I'm right here with you. How can I best support you in this moment?`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);

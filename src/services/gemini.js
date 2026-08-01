@@ -51,23 +51,25 @@ export async function getEmpatheticCounselorResponse(
   userMessage,
   moodContext = "Neutral",
   history = [],
-  journalContext = ""
+  journalContext = "",
+  userName = "Friend"
 ) {
   if (!userMessage || !userMessage.trim()) {
-    return "I'm right here. Feel free to share what's on your mind.";
+    return `I'm right here, ${userName}. Feel free to share what's on your mind.`;
   }
 
   if (ai) {
     for (const modelName of MODELS) {
       try {
         let prompt = `You are MindPal, a warm, compassionate AI mental health companion for students. 
+The student's name is "${userName}". Address them naturally by their name when appropriate to foster a warm, personal connection.
 Keep response under 140 words, non-clinical, encouraging, concise markdown format.`;
 
         if (journalContext) {
-          prompt += `\n\nHere is the student's recent private journal entries context for personalization:\n${journalContext}\nUse this context gently to personalize your support, referencing their reflections, moods, or triggers if helpful.`;
+          prompt += `\n\nHere is ${userName}'s recent private journal entries context for personalization:\n${journalContext}\nUse this context gently to personalize your support, referencing their reflections, moods, or triggers if helpful.`;
         }
 
-        prompt += `\n\nStudent Message: "${userMessage}"`;
+        prompt += `\n\nStudent (${userName}) Message: "${userMessage}"`;
 
         const response = await ai.models.generateContent({
           model: modelName,
@@ -84,7 +86,7 @@ Keep response under 140 words, non-clinical, encouraging, concise markdown forma
   }
 
   // Instant empathetic response fallback if API is unconfigured or unreachable
-  return "I hear you, and what you're feeling is valid. Take a slow, deep breath in and out. I'm right here with you. How can I best support you in this moment?";
+  return `I hear you, ${userName}, and what you're feeling is valid. Take a slow, deep breath in and out. I'm right here with you. How can I best support you in this moment?`;
 }
 
 /**
