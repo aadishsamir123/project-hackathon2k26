@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
+import DailyPathGuide from '../components/common/DailyPathGuide.jsx';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function Dashboard({ user, onOpenHelp }) {
   const navigate = useNavigate();
@@ -171,7 +173,19 @@ export default function Dashboard({ user, onOpenHelp }) {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
-      {/* Calm Welcome Header */}
+      {/* Mental Health Purpose Header */}
+      <PagePurposeHeader
+        badge="Sanctuary Home & Roadmap"
+        title="Mindful Sanctuary Hub"
+        purpose="HealthHaven serves as your daily student sanctuary for burnout prevention, emotional regulation, and somatic self-care."
+        evidence="Structured daily routines and multi-modal interventions (emotion logging, somatic breaks, AI reframing) build sustainable resilience against academic stress."
+        dailyAction="Follow your Daily Mental Health Path below, beginning with your morning heart check-in and ending with your evening gratitude jar."
+      />
+
+      {/* Daily Path Workflow Guide */}
+      <DailyPathGuide user={user} />
+
+      {/* Calm Welcome Header & Daily Affirmation */}
       <div className="bg-[#FFFDF9] dark:bg-[#262220] p-6 sm:p-8 rounded-3xl border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>

@@ -5,6 +5,10 @@ import {
   collection,
   addDoc,
   doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  getDocs,
   updateDoc,
   arrayUnion,
   increment,
@@ -72,28 +76,48 @@ export async function checkTutorialStatus(uid) {
 
 // ─── User Profile ─────────────────────────────────────────────────────────────
 
+export async function getUserProfile(uid) {
+  if (!uid || !db) return null;
+  try {
+    const userRef = doc(db, "users", uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) {
+      return { id: snap.id, ...snap.data() };
+    }
+  } catch (err) {
+    console.warn("Firestore getUserProfile error:", err);
+  }
+  return null;
+}
+
+export async function setUserDebugFlag(uid, debugValue = true) {
+  if (!uid || !db) return false;
+  try {
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, { debug: debugValue }, { merge: true });
+    return true;
+  } catch (err) {
+    console.warn("Firestore setUserDebugFlag error:", err);
+    return false;
+  }
+}
+
 export async function syncUserProfile(user) {
   if (!user || !db) return;
   try {
     const userRef = doc(db, "users", user.uid);
-    await updateDoc(userRef, {
-      displayName: user.displayName || "Student Friend",
-      email: user.email,
-      lastLogin: serverTimestamp(),
-    });
-  } catch (err) {
-    // Document might not exist yet; try creating
-    try {
-      const userRef = doc(db, "users", user.uid);
-      await addDoc(collection(db, "users"), {
+    await setDoc(
+      userRef,
+      {
         uid: user.uid,
         displayName: user.displayName || "Student Friend",
         email: user.email,
-        createdAt: serverTimestamp(),
-      });
-    } catch (e) {
-      console.warn("Firestore syncUserProfile warning:", e);
-    }
+        lastLogin: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (err) {
+    console.warn("Firestore syncUserProfile error:", err);
   }
 }
 
@@ -333,4 +357,155 @@ export function saveGratitudeEntry(text) {
   const updated = [newEntry, ...entries];
   localStorage.setItem(LOCAL_STORAGE_GRATITUDE, JSON.stringify(updated));
   return updated;
+}
+
+// ─── Reset Data for Hackathon Demo ──────────────────────────────────────────
+
+export async function resetUserDataForDemo(uid, selectedModules = {}) {
+  const {
+    mood = true,
+    physical = true,
+    community = true,
+    ai = true,
+    profile = true,
+  } = selectedModules;
+
+  // 1. Reset Mood & Gratitude Logs
+  if (mood) {
+    const demoMoodLogs = [
+      {
+        id: "demo-m-1",
+        emotion: "Grateful",
+        intensity: 9,
+        note: "Completed a 5-minute box breathing session with Serenity Corner and felt super peaceful before my morning presentation.",
+        tags: ["Daily Path", "Mindfulness"],
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: "demo-m-2",
+        emotion: "Calm",
+        intensity: 8,
+        note: "Spent 25 minutes studying with Pomodoro technique. Drank 8 glasses of water and felt clear-headed.",
+        tags: ["Hydration", "Focus"],
+        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
+      },
+      {
+        id: "demo-m-3",
+        emotion: "Overwhelmed",
+        intensity: 4,
+        note: "Midterm revision felt heavy, but MindPal AI helped reframe my anxious thoughts step by step.",
+        tags: ["Exam Stress", "MindPal AI"],
+        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+      },
+      {
+        id: "demo-m-4",
+        emotion: "Joyful",
+        intensity: 9,
+        note: "Connected with peers on Peer Haven Wall. Shared an encouraging note and felt a warm sense of community.",
+        tags: ["Community", "Support"],
+        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
+      },
+      {
+        id: "demo-m-5",
+        emotion: "Peaceful",
+        intensity: 8,
+        note: "Took a 20-20-20 eye rest break during desk study and did 3 neck stretches.",
+        tags: ["Somatic Rest", "Stretches"],
+        createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
+      },
+      {
+        id: "demo-m-6",
+        emotion: "Motivated",
+        intensity: 8,
+        note: "Reflected on past victories in my Heart Journal and prepared a healthy meal.",
+        tags: ["Wellness", "Nutrition"],
+        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
+      },
+      {
+        id: "demo-m-7",
+        emotion: "Calm",
+        intensity: 7,
+        note: "Evening gratitude jar moment: enjoyed a warm cup of chamomile tea.",
+        tags: ["Gratitude", "Rest"],
+        createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
+      },
+    ];
+
+    const demoGratitudeLogs = [
+      { id: "g-1", text: "A warm cup of chamomile tea during rainy morning study", timestamp: new Date().toISOString() },
+      { id: "g-2", text: "Encouragement message received on Peer Haven Wall", timestamp: new Date(Date.now() - 86400000 * 1).toISOString() },
+      { id: "g-3", text: "10 minutes of box breathing with peaceful ambient soundscapes", timestamp: new Date(Date.now() - 86400000 * 2).toISOString() },
+      { id: "g-4", text: "A super helpful group study session with friends", timestamp: new Date(Date.now() - 86400000 * 3).toISOString() },
+      { id: "g-5", text: "A restful 8 hours of sleep without screen distractions", timestamp: new Date(Date.now() - 86400000 * 4).toISOString() },
+    ];
+
+    localStorage.setItem(LOCAL_STORAGE_MOODS, JSON.stringify(demoMoodLogs));
+    localStorage.setItem(LOCAL_STORAGE_GRATITUDE, JSON.stringify(demoGratitudeLogs));
+
+    if (uid && db) {
+      try {
+        const moodLogsRef = collection(db, "users", uid, "moodLogs");
+        const snap = await getDocs(moodLogsRef);
+        const deletePromises = snap.docs.map((d) => deleteDoc(d.ref));
+        await Promise.all(deletePromises);
+
+        for (const log of demoMoodLogs) {
+          await addDoc(moodLogsRef, {
+            emotion: log.emotion,
+            intensity: log.intensity,
+            note: log.note,
+            tags: log.tags,
+            createdAt: serverTimestamp(),
+          });
+        }
+      } catch (err) {
+        console.warn("Firestore reset mood logs error:", err);
+      }
+    }
+  }
+
+  // 2. Reset Physical Wellbeing
+  if (physical) {
+    localStorage.setItem("mindhaven_water_count", "8");
+    localStorage.setItem("mindhaven_sleep_hours", "8.0");
+    localStorage.setItem("mindhaven_sleep_quality", "Restful");
+  }
+
+  // 3. Reset Anonymous Help Wall
+  if (community) {
+    localStorage.setItem(LOCAL_STORAGE_POSTS, JSON.stringify(INITIAL_ANON_POSTS));
+  }
+
+  // 4. Reset AI Chat Companion
+  if (ai) {
+    localStorage.removeItem("mindhaven_chat_history");
+    localStorage.removeItem("mindhaven_reframe_history");
+  }
+
+  // 5. Reset User Profile & Daily Path Progress
+  if (profile) {
+    localStorage.setItem(LOCAL_STORAGE_TUTORIAL, "true");
+    const fullDailyPath = ["step-1", "step-2", "step-3", "step-4", "step-5", "step-6"];
+    localStorage.setItem("mindhaven_daily_path_completed", JSON.stringify(fullDailyPath));
+
+    if (uid && db) {
+      try {
+        const userRef = doc(db, "users", uid);
+        await setDoc(
+          userRef,
+          {
+            debug: true,
+            tutorialCompleted: true,
+            demoResetAt: serverTimestamp(),
+            lastDemoSeed: new Date().toISOString(),
+          },
+          { merge: true }
+        );
+      } catch (err) {
+        console.warn("Firestore reset user profile error:", err);
+      }
+    }
+  }
+
+  return true;
 }

@@ -12,6 +12,8 @@ import {
   Play,
   Pause
 } from 'lucide-react';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
+
 export default function PhysicalWellbeing({ user }) {
   // Hydration state
   const [waterCups, setWaterCups] = useState(() => {
@@ -99,18 +101,16 @@ export default function PhysicalWellbeing({ user }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fadeIn">
       
-      {/* Header */}
-      <div id="tour-physical-header" className="space-y-1">
-        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-200 border border-orange-200 dark:border-orange-800">
-          Physical Vitality & Movement ⚡
-        </span>
-        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100">
-          Student Body & Mind Harmony
-        </h1>
-        <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-2xl">
-          Physical wellbeing directly powers your emotional health. Track hydration, sleep quality, eye breaks, and quick study stretches.
-        </p>
-      </div>
+      {/* Mental Health Purpose Header */}
+      <PagePurposeHeader
+        badge="Somatic Vitality & Rest"
+        title="Student Body & Mind Harmony"
+        purpose="Regulate your physical body to support your emotional health — track hydration, sleep recovery, 20-20-20 eye strain breaks, and ergonomic study stretches."
+        evidence="Dehydration directly spikes cortisol levels and reduces cognitive processing. Somatic stretches trigger parasympathetic rest-and-digest states."
+        dailyAction="Log your daily glasses of water, record last night's sleep quality, and take a 20-second screen break."
+        stepNumber={2}
+        totalSteps={6}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         

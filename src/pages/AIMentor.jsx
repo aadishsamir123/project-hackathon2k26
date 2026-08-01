@@ -20,6 +20,7 @@ import MarkdownRenderer from '../components/common/MarkdownRenderer.jsx';
 import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../services/gemini.js';
 import { subscribeToMoodLogs } from '../services/firestore.js';
 import { GroundingVagalDiagram } from '../components/wellness/VisualTutorialDiagrams.jsx';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function AIMentor({ user, onOpenResources }) {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat', 'reframer', 'grounding'
@@ -151,23 +152,19 @@ export default function AIMentor({ user, onOpenResources }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      {/* Header Banner */}
-      <div id="tour-mindpal-header" className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-200 border border-orange-200 dark:border-orange-800">
-              MindPal Companion
-            </span>
-          </div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-800 dark:text-stone-100 tracking-tight mt-1">
-            MindPal AI Assistant
-          </h1>
-          <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400">
-            Empathetic AI listener providing cognitive reframing, emotional guidance, and grounding exercises.
-          </p>
-        </div>
+      {/* Mental Health Purpose Header */}
+      <PagePurposeHeader
+        badge="Cognitive Reframing & AI Support"
+        title="MindPal AI Assistant & CBT Toolkit"
+        purpose="Receive non-judgmental 24/7 empathetic listening, reframe cognitive distortions, and practice sensory grounding."
+        evidence="Cognitive Behavioral Therapy (CBT) thought reframing helps interrupt cognitive traps like catastrophizing and black-and-white thinking."
+        dailyAction="Chat with MindPal about your day, or enter an unhelpful anxious thought into the CBT Reframer to get 3 grounded perspectives."
+        stepNumber={4}
+        totalSteps={6}
+      />
 
-        {/* Navigation Sub-tabs */}
+      {/* Navigation Sub-tabs */}
+      <div className="flex items-center justify-start">
         <div className="flex items-center space-x-1.5 bg-[#FFFDF9] dark:bg-[#262220] p-1.5 rounded-2xl border border-amber-200/80 dark:border-stone-700 shadow-xs">
           <button
             onClick={() => setActiveTab('chat')}

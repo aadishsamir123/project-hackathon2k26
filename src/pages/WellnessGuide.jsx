@@ -26,6 +26,7 @@ import {
   HybridSystemDiagram
 } from '../components/wellness/VisualTutorialDiagrams.jsx';
 import { subscribeToMoodLogs } from '../services/firestore.js';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function WellnessGuide({ user }) {
   const [selectedPart, setSelectedPart] = useState('all');
@@ -251,27 +252,14 @@ export default function WellnessGuide({ user }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
-      {/* Header Banner */}
-      <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 sm:p-8 border border-amber-200/80 dark:border-stone-800 shadow-xs relative overflow-hidden space-y-4">
-        <div className="flex items-center space-x-2">
-          <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-700 tracking-wider uppercase font-serif">
-            COMPLETE PRACTICE GUIDE & TOOLKIT
-          </span>
-        </div>
-
-        <div className="max-w-3xl space-y-2">
-          <h1 className="font-heading text-3xl sm:text-4xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight">
-            Mind & Body Wellness Guide
-          </h1>
-          <p className="text-sm sm:text-base text-stone-600 dark:text-stone-300 leading-relaxed font-serif italic">
-            An authoritative handbook detailing top mental and physical health journals, featuring step-by-step implementation methods and visual exercise & breathing tutorials.
-          </p>
-        </div>
-
-        <div className="pt-2 border-t border-amber-200/50 dark:border-stone-800 text-xs text-stone-500 dark:text-stone-400">
-          Structured wellness tracking provides the foundation for sustainable mental resilience and physical vitality. Selecting the right practice is essential for long-term student success.
-        </div>
-      </div>
+      {/* Mental Health Purpose Header */}
+      <PagePurposeHeader
+        badge="Evidence-Based Mental Health Handbook"
+        title="Mind & Body Practice Guide"
+        purpose="Explore interactive visual tutorials, cognitive frameworks, and somatic exercises adapted from top clinical wellness journals."
+        evidence="Psychoeducation empowers students with actionable coping mechanisms, self-assessment tools, and physical self-care protocols."
+        dailyAction="Filter by Mind or Body toolkits, read a 2-minute visual diagram, and try a new practice session today."
+      />
 
       {/* Personalized Methodology Recommendation */}
       {personalRec && (

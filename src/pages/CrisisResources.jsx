@@ -9,6 +9,7 @@ import {
   MapPin,
   Clock
 } from 'lucide-react';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function CrisisResources() {
   const [copiedNumber, setCopiedNumber] = useState('');
@@ -45,6 +46,15 @@ export default function CrisisResources() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      
+      {/* Mental Health Purpose Header */}
+      <PagePurposeHeader
+        badge="Safety & Immediate Care Path"
+        title="24/7 Crisis Support & Hotlines"
+        purpose="Provide immediate, confidential, and professional crisis intervention resources for urgent emotional distress or safety concerns."
+        evidence="Immediate accessibility to crisis helplines significantly reduces severe acute distress and prevents harm during overwhelming moments."
+        dailyAction="Save emergency hotline numbers to your contacts or tap any number below to copy it immediately."
+      />
       
       {/* Red Action Callout */}
       <div className="bg-rose-900 text-white rounded-3xl p-6 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

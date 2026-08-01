@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import AmbientSoundPlayer from '../components/common/AmbientSoundPlayer.jsx';
 import MicroMeditationCards from '../components/common/MicroMeditationCards.jsx';
+import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [breathingTechnique, setBreathingTechnique] = useState('478'); // '478', 'box', 'equal'
@@ -114,17 +115,16 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       
-      {/* Header */}
-      <div id="tour-serenity-header" className="flex items-center justify-between">
-        <div>
-          <span className="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wider">
-            Serenity
-          </span>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100">
-            Breathing & Stillness
-          </h1>
-        </div>
-      </div>
+      {/* Mental Health Purpose Header */}
+      <PagePurposeHeader
+        badge="Nervous System Regulation"
+        title="Breathing & Stillness Sanctuary"
+        purpose="De-escalate high anxiety, lower physical heart rate, and re-anchor your attention through guided rhythmic breathing and ambient soundscapes."
+        evidence="Rhythmic breathing (such as 4-7-8 and Box Breathing) stimulates the vagus nerve, reducing heart rate variability stress indicators within 180 seconds."
+        dailyAction="Select a breathing rhythm, tap the pulsing orb to start, and complete 4 full breath cycles."
+        stepNumber={3}
+        totalSteps={6}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
