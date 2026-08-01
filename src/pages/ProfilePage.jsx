@@ -342,23 +342,11 @@ export default function ProfilePage({ user }) {
                     <Wrench className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <h3 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
-                      <span>Hackathon Demo & Debug Settings</span>
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-200 font-extrabold border border-orange-300 dark:border-orange-800">
-                        Firestore debug=true
-                      </span>
-                    </h3>
-                    <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                      Authorized debug account detected in Firestore database.
-                    </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-3 pt-1 border-t border-amber-200/60 dark:border-stone-800">
-                <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed font-sans">
-                  Click <strong>"Reset Data for Demo"</strong> to open the interactive checkbox menu. Select which portal modules to reset and fill with prefilled demo data for hackathon presentation.
-                </p>
 
                 <div className="flex items-center justify-start pt-1">
                   <button
