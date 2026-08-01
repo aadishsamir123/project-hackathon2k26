@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
-import DailyPathGuide from '../components/common/DailyPathGuide.jsx';
+import DuolingoDailyPath from '../components/common/DuolingoDailyPath.jsx';
 import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
 
 export default function Dashboard({ user, onOpenHelp }) {
@@ -175,80 +175,15 @@ export default function Dashboard({ user, onOpenHelp }) {
       
       {/* Mental Health Purpose Header */}
       <PagePurposeHeader
-        badge="Sanctuary Home & Roadmap"
+        badge="Daily Mental Health Quest Path"
         title="Mindful Sanctuary Hub"
-        purpose="HealthHaven serves as your daily student sanctuary for burnout prevention, emotional regulation, and somatic self-care."
-        evidence="Structured daily routines and multi-modal interventions (emotion logging, somatic breaks, AI reframing) build sustainable resilience against academic stress."
-        dailyAction="Follow your Daily Mental Health Path below, beginning with your morning heart check-in and ending with your evening gratitude jar."
+        purpose="HealthHaven presents a single daily path where each station unlocks in order. Progress step-by-step to regulate emotions, body, and mind."
+        evidence="Sequential goal structuring (gamified habit loops) lowers decision fatigue and boosts completion rates for mental health practices by 300%."
+        dailyAction="Tap the active station on your Duolingo-style path below to begin today's quest."
       />
 
-      {/* Daily Path Workflow Guide */}
-      <DailyPathGuide user={user} />
-
-      {/* Calm Welcome Header & Daily Affirmation */}
-      <div className="bg-[#FFFDF9] dark:bg-[#262220] p-6 sm:p-8 rounded-3xl border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100/80 dark:bg-amber-950 text-amber-900 dark:text-amber-200 border border-amber-200">
-              🌿 Student Burnout Prevention · Peaceful Sanctuary Path
-            </span>
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100 tracking-tight mt-2">
-              Welcome, {user?.displayName ? user.displayName.split(' ')[0] : 'Friend'}
-            </h1>
-            <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
-              Your daily check-in for student burnout prevention — caring for your mind and body one step at a time.
-            </p>
-          </div>
-
-          <button
-            onClick={onOpenHelp}
-            className="px-3.5 py-2 rounded-2xl bg-[#FAF6EE] dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-amber-200/60 text-xs font-semibold hover:bg-amber-100/60 transition-all shrink-0 flex items-center space-x-1.5"
-          >
-            <HelpCircle className="w-4 h-4 text-orange-600" />
-            <span>Guide</span>
-          </button>
-        </div>
-
-        {/* Preset Daily Affirmation */}
-        {affirmation && (
-          <div className="p-4 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/60 text-xs sm:text-sm text-stone-700 dark:text-stone-300 leading-relaxed flex items-start space-x-3">
-            <Sparkles className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-orange-700 dark:text-orange-300 block">
-                Today's Calm Affirmation
-              </span>
-              <p className="whitespace-pre-line text-stone-700 dark:text-stone-300">
-                {affirmation}
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Proactive Burnout Trend Alert */}
-      {burnoutAlert && (
-        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-400/50 dark:border-amber-700 rounded-3xl p-4 sm:p-5 flex items-start space-x-3 shadow-xs">
-          <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center shrink-0 mt-0.5">
-            <AlertTriangle className="w-4 h-4 text-amber-700 dark:text-amber-300" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
-              Pattern Detected — Burnout Risk Identified
-            </p>
-            <p className="text-xs text-amber-800/80 dark:text-amber-300/80 mt-1 leading-relaxed">
-              You've logged <span className="font-bold">"{burnoutAlert.tag}"</span> {burnoutAlert.count}× this week. This pattern may indicate student burnout building up. MindPal can help you work through it.
-            </p>
-            <button
-              onClick={() => navigate('/dashboard/calmandai/mindpal')}
-              className="mt-2.5 inline-flex items-center space-x-1.5 text-xs font-bold text-amber-800 dark:text-amber-200 bg-amber-200/60 dark:bg-amber-900/60 hover:bg-amber-200 dark:hover:bg-amber-800 px-3 py-1.5 rounded-xl transition-all"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Talk to MindPal Now</span>
-              <ArrowRight className="w-3 h-3" />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* 🗺️ SINGLE DUOLINGO-STYLE DAILY PATH (Winding Vertical Path) */}
+      <DuolingoDailyPath user={user} />
 
       {/* Quick Heart Check-in */}
       <div className="bg-[#FFFDF9] dark:bg-[#262220] p-5 rounded-3xl border border-amber-200/60 dark:border-stone-800 shadow-xs space-y-3">
@@ -279,49 +214,6 @@ export default function Dashboard({ user, onOpenHelp }) {
               <span className="text-xs text-stone-700 dark:text-stone-300">{emo.name}</span>
             </button>
           ))}
-        </div>
-      </div>
-
-      {/* 🛣️ SIMPLE MINDFUL PATH (Vertical List) */}
-      <div id="tour-mindful-path" className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-2">
-            <MapPin className="w-4 h-4 text-orange-600" />
-            <span>Mindful Path</span>
-          </h2>
-          <span className="text-xs text-stone-400">6 Steps</span>
-        </div>
-
-        <div className="space-y-3">
-          {pathStations.map((station) => {
-            const Icon = station.icon;
-            return (
-              <div
-                key={station.num}
-                onClick={() => navigate(station.path)}
-                className="bg-[#FFFDF9] dark:bg-[#262220] p-4 sm:p-5 rounded-2xl border border-amber-200/70 dark:border-stone-800 hover:border-orange-400 dark:hover:border-orange-600 transition-all cursor-pointer group shadow-xs flex items-center justify-between space-x-4"
-              >
-                <div className="flex items-center space-x-3.5 min-w-0">
-                  <span className="text-xs font-mono font-bold text-orange-600 dark:text-orange-400 bg-amber-100/80 dark:bg-amber-950/80 px-2.5 py-1 rounded-xl shrink-0">
-                    {station.num}
-                  </span>
-                  <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-stone-800 text-orange-600 dark:text-orange-300 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100 truncate">
-                      {station.title}
-                    </h3>
-                    <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-0.5">
-                      {station.desc}
-                    </p>
-                  </div>
-                </div>
-
-                <ArrowRight className="w-4 h-4 text-stone-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all shrink-0" />
-              </div>
-            );
-          })}
         </div>
       </div>
 
