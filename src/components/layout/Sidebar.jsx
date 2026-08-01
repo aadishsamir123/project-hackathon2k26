@@ -6,7 +6,7 @@ const HACKATHON_NAV_SECTIONS = [
     items: [
       { id: 'dashboard', label: 'Student Dashboard', sublabel: 'Stats & Game Summary', icon: '🏠' },
       { id: 'simulator', label: 'Playable Simulator', sublabel: 'Campus Survival Game 🎮', icon: '🎮' },
-      { id: 'ai-mentor', label: 'Gemini AI Mentor', sublabel: 'Waste Sorter & Study Cram', icon: '🤖' },
+      { id: 'ai-mentor', label: 'MindPal AI Assistant', sublabel: 'Student Mental Health & Advice', icon: '🤖' },
       { id: 'leaderboard', label: 'Eco Leaderboard', sublabel: 'Campus Ranks & Badges 🏆', icon: '🏆' },
       { id: 'textbook-swap', label: 'Textbook Swap Hub', sublabel: 'Reuse Books & Gear', icon: '📖' },
       { id: 'eco-commute', label: 'Eco-Commute Planner', sublabel: 'MRT & Shuttle vs Grab', icon: '🚴' },

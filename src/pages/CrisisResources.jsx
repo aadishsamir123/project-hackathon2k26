@@ -54,7 +54,7 @@ export default function CrisisResources() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       
       {/* Emergency Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-600 via-rose-500 to-indigo-600 p-6 sm:p-8 text-white shadow-md">
+      <div id="tour-crisis-header" className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-600 via-rose-500 to-indigo-600 p-6 sm:p-8 text-white shadow-md">
         <div className="space-y-3 relative z-10 max-w-3xl">
           <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/20 backdrop-blur-md">
             <ShieldAlert className="w-4 h-4 text-white animate-pulse" />

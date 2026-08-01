@@ -20,9 +20,9 @@ export default function OnboardingTutorialModal({ isOpen, onClose, onComplete })
   const steps = [
     {
       icon: Heart,
-      badge: "Welcome to MindHaven 🌿",
+      badge: "Welcome to HealthHaven 🌿",
       title: "Your Student Emotional Safe Space",
-      desc: "MindHaven is a minimalistic, comforting platform built for students to track feelings, build resilience, and receive gentle guidance without judgment.",
+      desc: "HealthHaven is a minimalistic, comforting platform built for students to track feelings, build resilience, and receive gentle guidance without judgment.",
       highlights: [
         "100% Private & Student-Focused",
         "Calming Dark & Light Design",
@@ -195,7 +195,7 @@ export default function OnboardingTutorialModal({ isOpen, onClose, onComplete })
             onClick={handleNext}
             className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md shadow-emerald-600/20 flex items-center space-x-1.5"
           >
-            <span>{currentStep === steps.length - 1 ? 'Start Exploring MindHaven 🌿' : 'Next Step'}</span>
+            <span>{currentStep === steps.length - 1 ? 'Start Exploring HealthHaven 🌿' : 'Next Step'}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>

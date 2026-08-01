@@ -68,7 +68,7 @@ export default function LoginPage({ initialTab = 'signin', onBackToHome }) {
             <Heart className="w-7 h-7 fill-white/20" />
           </div>
           <h1 className="font-heading text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">
-            MindHaven Student Space
+            HealthHaven Student Space
           </h1>
           <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">
             Sign in to sync your mood logs & peer support safely across devices

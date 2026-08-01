@@ -3,7 +3,7 @@ import EwasteMapIframe from '../map/EwasteMapIframe.jsx';
 
 const HACKATHON_HIGHLIGHTS = [
   { id: 'simulator', title: '1. Playable Campus Survival Game 🎮', icon: '🎮', desc: 'Interactive decision rounds for money, GPA grades, stress & carbon.' },
-  { id: 'ai-mentor', title: '2. Gemini AI Campus Mentor 🤖', icon: '🤖', desc: 'Instant AI waste recycling sorter & exam cram schedule optimizer.' },
+  { id: 'ai-mentor', title: '2. MindPal AI Campus Companion 🤖', icon: '🤖', desc: 'Instant AI student advice & mental health counselor.' },
   { id: 'leaderboard', title: '3. Singapore Campus Leaderboard 🏆', icon: '🏆', desc: 'Compete across NUS, NTU, SMU, Polys & JCs for high scores & badges.' },
   { id: 'textbook-swap', title: '4. Textbook & Gear Swap Hub 📖', icon: '📖', desc: 'Swap textbooks, notes, calculators & dorm supplies directly on Telegram.' },
   { id: 'eco-commute', title: '5. Eco-Commute Planner 🚴', icon: '🚴', desc: 'Compare carbon & money saved walking/cycling/shuttles vs Grab.' },
@@ -58,7 +58,7 @@ export default function LandingPage({ onOpenAuth }) {
           </h1>
 
           <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed font-normal">
-            Play the interactive <strong>Campus Survival Simulator</strong> to balance Pocket Money (S$), Academic Grades (GPA), Mental Health, and Carbon Impact with live Gemini AI coaching.
+            Play the interactive <strong>Campus Survival Simulator</strong> to balance Pocket Money (S$), Academic Grades (GPA), Mental Health, and Carbon Impact with live MindPal AI coaching.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">

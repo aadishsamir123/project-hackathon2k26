@@ -14,7 +14,10 @@ import {
   CheckCircle2,
   ArrowRight,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  Activity,
+  Droplet,
+  Moon
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs, saveGratitudeEntry, getLocalGratitudeEntries } from '../services/firestore.js';
 import { generateDailyAffirmation } from '../services/gemini.js';
@@ -58,11 +61,9 @@ export default function Dashboard({ user, onOpenHelp }) {
     return unsub;
   }, [user]);
 
-  const fetchAffirmation = async (mood) => {
-    setLoadingAffirmation(true);
-    const text = await generateDailyAffirmation(mood);
+  const fetchAffirmation = (mood) => {
+    const text = generateDailyAffirmation(mood);
     setAffirmation(text);
-    setLoadingAffirmation(false);
   };
 
   const handleQuickCheckin = async (emotion) => {
@@ -103,7 +104,7 @@ export default function Dashboard({ user, onOpenHelp }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
       {/* Welcome & Mood Focus Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-100 dark:border-slate-800 p-6 sm:p-8 backdrop-blur-sm">
+      <div id="tour-home-hub" className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-indigo-500/10 border border-emerald-100 dark:border-slate-800 p-6 sm:p-8 backdrop-blur-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -246,7 +247,7 @@ export default function Dashboard({ user, onOpenHelp }) {
           </div>
 
           {/* Quick Action Navigation Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div
               onClick={() => navigate('/dashboard/myspace/emotionlog')}
               className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all cursor-pointer group shadow-xs space-y-2"
@@ -260,6 +261,22 @@ export default function Dashboard({ user, onOpenHelp }) {
               </h4>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
                 Log deep emotion ratings, add context tags, and view weekly graphs.
+              </p>
+            </div>
+
+            <div
+              onClick={() => navigate('/dashboard/myspace/physical')}
+              className="bg-white dark:bg-slate-800 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 hover:border-sky-400 dark:hover:border-sky-600 transition-all cursor-pointer group shadow-xs space-y-2"
+            >
+              <div className="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-300 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Activity className="w-5 h-5" />
+              </div>
+              <h4 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center justify-between">
+                <span>Physical Vitality</span>
+                <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                Hydration log, sleep quality, 20-20-20 eye rest & study stretches.
               </p>
             </div>
 
@@ -327,6 +344,44 @@ export default function Dashboard({ user, onOpenHelp }) {
             <div className="p-3 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60 text-xs text-emerald-800 dark:text-emerald-300 flex items-center space-x-2">
               <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Consistency Streak: <strong>{moodLogs.length ? 'Active 🔥' : 'Start Log Today 🌿'}</strong></span>
+            </div>
+          </div>
+
+          {/* Physical Health Summary Panel */}
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-heading text-sm font-bold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
+                <Activity className="w-4 h-4 text-sky-500" />
+                <span>Physical Vitality</span>
+              </h3>
+              <button
+                onClick={() => navigate('/dashboard/myspace/physical')}
+                className="text-[11px] text-sky-600 dark:text-sky-400 font-semibold hover:underline"
+              >
+                Track & Stretch →
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3.5 rounded-2xl bg-sky-50/60 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900/40">
+                <div className="flex items-center space-x-1 text-[10px] text-sky-700 dark:text-sky-300 font-bold">
+                  <Droplet className="w-3.5 h-3.5 fill-current" />
+                  <span>Hydration</span>
+                </div>
+                <p className="text-lg font-extrabold text-sky-700 dark:text-sky-300 mt-1">
+                  {localStorage.getItem('mindhaven_water_count') || '3'} / 8 <span className="text-[10px] font-normal">cups</span>
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
+                <div className="flex items-center space-x-1 text-[10px] text-indigo-700 dark:text-indigo-300 font-bold">
+                  <Moon className="w-3.5 h-3.5" />
+                  <span>Sleep Log</span>
+                </div>
+                <p className="text-lg font-extrabold text-indigo-700 dark:text-indigo-300 mt-1">
+                  7.5 <span className="text-[10px] font-normal">hours</span>
+                </p>
+              </div>
             </div>
           </div>
 

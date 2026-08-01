@@ -102,7 +102,7 @@ export default function AnonymousHelpWall() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       
       {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-emerald-500/10 border border-indigo-100 dark:border-slate-800 p-6 sm:p-8 backdrop-blur-sm">
+      <div id="tour-peerhaven-header" className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-emerald-500/10 border border-indigo-100 dark:border-slate-800 p-6 sm:p-8 backdrop-blur-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex items-center space-x-2">

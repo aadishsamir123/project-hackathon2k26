@@ -9,11 +9,12 @@ import CrisisBanner from './components/common/CrisisBanner.jsx';
 import HelpModal from './components/common/HelpModal.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import AmbientSoundPlayer from './components/common/AmbientSoundPlayer.jsx';
-import OnboardingTutorialModal from './components/common/OnboardingTutorialModal.jsx';
+import GuidedTourOverlay from './components/common/GuidedTourOverlay.jsx';
 
 // MindHaven Pages
 import Dashboard from './pages/Dashboard.jsx';
 import MoodTracker from './pages/MoodTracker.jsx';
+import PhysicalWellbeing from './pages/PhysicalWellbeing.jsx';
 import AnonymousHelpWall from './pages/AnonymousHelpWall.jsx';
 import AIMentor from './pages/AIMentor.jsx';
 import SerenityCorner from './pages/SerenityCorner.jsx';
@@ -77,7 +78,7 @@ export default function App() {
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-indigo-500 flex items-center justify-center mx-auto text-white text-xl shadow-md animate-pulse">
             🌿
           </div>
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">MindHaven Student Safe Space</p>
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">HealthHaven Student Safe Space</p>
           <p className="text-xs text-slate-400">Loading your peaceful sanctuary…</p>
         </div>
       </div>
@@ -138,6 +139,7 @@ export default function App() {
                   <Routes>
                     <Route path="myspace/homehub" element={<Dashboard user={user} onOpenHelp={() => setIsHelpOpen(true)} />} />
                     <Route path="myspace/emotionlog" element={<MoodTracker user={user} />} />
+                    <Route path="myspace/physical" element={<PhysicalWellbeing user={user} />} />
                     <Route path="profile/me" element={<ProfilePage user={user} />} />
                     <Route path="calmandai/mindpal" element={<AIMentor onOpenResources={() => navigate('/dashboard/connect/resources')} />} />
                     <Route path="calmandai/serenity" element={<SerenityCorner isAudioPlaying={isAudioPlaying} onToggleAudio={() => setIsAudioPlaying(!isAudioPlaying)} />} />
@@ -150,7 +152,7 @@ export default function App() {
                 {/* Subtle Footer */}
                 <footer className="bg-white/50 dark:bg-slate-900/50 border-t border-slate-200/60 dark:border-slate-800 py-6 px-4 text-center text-xs text-slate-400">
                   <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <span>MindHaven</span>
+                    <span>HealthHaven</span>
                     <div className="flex items-center space-x-4">
                       <button onClick={() => setIsHelpOpen(true)} className="hover:underline">About & FAQ</button>
                       <button onClick={() => navigate('/dashboard/connect/resources')} className="hover:underline text-rose-500 font-semibold">Crisis Hotlines</button>
@@ -169,8 +171,8 @@ export default function App() {
         />
       </Routes>
 
-      {/* Interactive Onboarding Tutorial Modal */}
-      <OnboardingTutorialModal
+      {/* Interactive Guided Onscreen Tour Overlay */}
+      <GuidedTourOverlay
         isOpen={isTutorialOpen}
         onClose={handleCompleteTutorial}
         onComplete={handleCompleteTutorial}

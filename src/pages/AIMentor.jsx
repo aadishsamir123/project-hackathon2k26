@@ -15,11 +15,12 @@ import {
   Zap,
   Shield
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../services/gemini.js';
 
 export default function AIMentor({ onOpenResources }) {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat', 'reframer', 'grounding'
-  const [useOnlineAI, setUseOnlineAI] = useState(false); // Default to Local Quota Saver Mode (0 API calls)
   
   // Chat state
   const [chatMessages, setChatMessages] = useState([
@@ -31,7 +32,6 @@ export default function AIMentor({ onOpenResources }) {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const chatEndRef = useRef(null);
 
   // Thought Reframer state
   const [anxiousThought, setAnxiousThought] = useState('');
@@ -78,7 +78,7 @@ export default function AIMentor({ onOpenResources }) {
     const crisisKeywords = ['suicide', 'end my life', 'want to die', 'harm myself', 'no point living'];
     const matchesCrisis = crisisKeywords.some((k) => userText.toLowerCase().includes(k));
 
-    const response = await getEmpatheticCounselorResponse(userText, 'Student Chat', newChat, useOnlineAI);
+    const response = await getEmpatheticCounselorResponse(userText, 'Student Chat', newChat);
 
     setChatMessages([
       ...newChat,
@@ -96,7 +96,7 @@ export default function AIMentor({ onOpenResources }) {
     e.preventDefault();
     if (!anxiousThought.trim() || isReframing) return;
     setIsReframing(true);
-    const result = await reframeCognitiveThought(anxiousThought.trim(), useOnlineAI);
+    const result = await reframeCognitiveThought(anxiousThought.trim());
     setReframeResult(result);
     setIsReframing(false);
   };
@@ -105,81 +105,62 @@ export default function AIMentor({ onOpenResources }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div id="tour-mindpal-header" className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
-              AI Mental Health Companion
+              MindPal AI Companion
             </span>
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight mt-1">
-            MindPal AI Assistant
+            MindPal AI Assistant 🤖
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Mindful AI listener that will provide empathetic support, cognitive reframing, and grounding exercises. Please note that this AI is not a substitute for professional mental health care. If you are in crisis, please reach out to trained professionals immediately.
+            Empathetic AI listener providing cognitive reframing, emotional guidance, and grounding exercises.
           </p>
         </div>
 
-        {/* Controls: Mode Switcher & Sub-tabs */}
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
-          
-          {/* Quota Protection Switcher */}
+        {/* Navigation Sub-tabs */}
+        <div className="flex items-center space-x-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
           <button
-            onClick={() => setUseOnlineAI(!useOnlineAI)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center space-x-1.5 ${
-              useOnlineAI
-                ? 'bg-purple-100 dark:bg-purple-950 border-purple-300 text-purple-700 dark:text-purple-300'
-                : 'bg-emerald-50 dark:bg-emerald-950 border-emerald-300 text-emerald-700 dark:text-emerald-300'
+            onClick={() => setActiveTab('chat')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              activeTab === 'chat'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
             }`}
-            title="Toggle between Local Quota Saver Mode and Live Gemini API"
           >
-            {useOnlineAI ? <Sparkles className="w-3.5 h-3.5 text-purple-500" /> : <Shield className="w-3.5 h-3.5 text-emerald-500" />}
-            <span>{useOnlineAI ? 'Online Gemini AI' : '⚡ Quota Protection (0 API Calls)'}</span>
+            <Bot className="w-3.5 h-3.5" />
+            <span>Listener</span>
           </button>
 
-          {/* Navigation Sub-tabs */}
-          <div className="flex items-center space-x-1.5 bg-white dark:bg-slate-800 p-1.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs">
-            <button
-              onClick={() => setActiveTab('chat')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                activeTab === 'chat'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
-            >
-              <Bot className="w-3.5 h-3.5" />
-              <span>Listener</span>
-            </button>
+          <button
+            onClick={() => setActiveTab('reframer')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              activeTab === 'reframer'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+            }`}
+          >
+            <Brain className="w-3.5 h-3.5" />
+            <span>CBT Reframer</span>
+          </button>
 
-            <button
-              onClick={() => setActiveTab('reframer')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                activeTab === 'reframer'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
-            >
-              <Brain className="w-3.5 h-3.5" />
-              <span>Reframer</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab('grounding')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
-                activeTab === 'grounding'
-                  ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Grounding</span>
-            </button>
-          </div>
-
+          <button
+            onClick={() => setActiveTab('grounding')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+              activeTab === 'grounding'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            <span>5-4-3-2-1 Grounding</span>
+          </button>
         </div>
       </div>
 
-      {/* Tab 1: Empathetic AI Chat Listener */}
+      {/* Tab 1: AI Chat Listener */}
       {activeTab === 'chat' && (
         <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/80 dark:border-slate-700/80 shadow-xs overflow-hidden flex flex-col h-[600px]">
           
@@ -191,11 +172,11 @@ export default function AIMentor({ onOpenResources }) {
               </div>
               <div>
                 <h3 className="font-heading text-xs font-bold text-slate-800 dark:text-slate-100">
-                  MindPal AI Listener
+                  MindPal AI Counselor
                 </h3>
                 <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>{useOnlineAI ? 'Online Gemini Model Active' : 'Local Quota Saver Active (Zero API Usage)'}</span>
+                  <span>Empathetic AI Companion Active</span>
                 </span>
               </div>
             </div>
@@ -215,76 +196,79 @@ export default function AIMentor({ onOpenResources }) {
                   className={`flex ${isAi ? 'justify-start' : 'justify-end'} space-x-2`}
                 >
                   {isAi && (
-                    <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 flex items-center justify-center text-xs shrink-0 mt-1">
+                    <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 mt-1">
                       🤖
                     </div>
                   )}
 
-                  <div className={`max-w-[85%] sm:max-w-[75%] space-y-1 ${isAi ? 'items-start' : 'items-end'}`}>
-                    <div
-                      className={`p-4 rounded-3xl text-xs sm:text-sm leading-relaxed ${
-                        isAi
-                          ? 'bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-tl-xs'
-                          : 'bg-indigo-600 text-white rounded-tr-xs shadow-xs font-medium'
-                      }`}
-                    >
-                      {msg.text.split('\n').map((line, i) => (
-                        <p key={i} className={i > 0 ? 'mt-1.5' : ''}>
-                          {line.replace(/\*\*(.*?)\*\*/g, '$1')}
-                        </p>
-                      ))}
+                  <div className={`max-w-[85%] sm:max-w-[75%] rounded-3xl p-4 space-y-2 text-xs sm:text-sm ${
+                    isAi
+                      ? 'bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-tl-xs'
+                      : 'bg-indigo-600 text-white rounded-tr-xs'
+                  }`}>
+                    <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {msg.text}
+                      </ReactMarkdown>
                     </div>
 
                     {msg.isCrisisMatch && (
-                      <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 text-xs space-y-1">
-                        <div className="flex items-center space-x-1 font-bold">
-                          <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+                      <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/80 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 space-y-2 mt-3">
+                        <div className="flex items-center space-x-1.5 font-bold text-xs">
+                          <ShieldAlert className="w-4 h-4 text-rose-600" />
                           <span>Immediate Crisis Helplines Available</span>
                         </div>
                         <p className="text-[11px]">
-                          Please remember that you can call or text <strong>1767 SOS</strong> right now for free, confidential 24/7 care.
+                          Please remember that you can call or text <strong>1767 SOS</strong> or <strong>988 Lifeline</strong> right now for free, confidential 24/7 care.
                         </p>
                         <button
                           onClick={onOpenResources}
-                          className="text-[11px] font-bold text-rose-700 dark:text-rose-300 underline"
+                          className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition-all"
                         >
-                          View Emergency Resources →
+                          View 24/7 Crisis Hotlines
                         </button>
                       </div>
                     )}
 
-                    <span className="text-[9px] text-slate-400 font-mono px-1 block text-right">
+                    <div className={`text-[10px] text-right ${isAi ? 'text-slate-400' : 'text-indigo-200'}`}>
                       {msg.timestamp}
-                    </span>
+                    </div>
                   </div>
+
+                  {!isAi && (
+                    <div className="w-7 h-7 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0 mt-1">
+                      <User className="w-4 h-4" />
+                    </div>
+                  )}
                 </div>
               );
             })}
 
             {isTyping && (
-              <div className="flex items-center space-x-2 text-slate-400 text-xs pl-2">
-                <div className="w-6 h-6 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-600 flex items-center justify-center text-xs animate-spin">
-                  ✨
+              <div className="flex justify-start space-x-2">
+                <div className="w-7 h-7 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                  🤖
                 </div>
-                <span className="italic">MindPal is processing a gentle response…</span>
+                <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-900 text-xs text-slate-400 flex items-center space-x-2 animate-pulse">
+                  <span>MindPal AI is thinking…</span>
+                </div>
               </div>
             )}
-            <div ref={chatEndRef} />
           </div>
 
-          {/* Chat Input Bar */}
+          {/* Input Bar */}
           <form onSubmit={handleSendMessage} className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-700/80 flex items-center space-x-2">
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Tell MindPal what's on your mind today…"
+              placeholder="Share what's on your mind..."
               className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 text-xs sm:text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
             />
             <button
               type="submit"
-              disabled={isTyping || !inputMessage.trim()}
-              className="p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white transition-all disabled:opacity-50 shadow-xs"
+              disabled={!inputMessage.trim() || isTyping}
+              className="p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white font-bold transition-all shadow-md shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -338,15 +322,13 @@ export default function AIMentor({ onOpenResources }) {
             <div className="p-6 rounded-3xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 space-y-4 animate-fadeIn">
               <h4 className="font-heading text-sm font-bold text-indigo-900 dark:text-indigo-200 flex items-center space-x-2">
                 <Lightbulb className="w-4 h-4 text-indigo-600" />
-                <span>Reframed Cognitive Analysis</span>
+                <span>AI Reframed Cognitive Analysis</span>
               </h4>
 
-              <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed space-y-2">
-                {reframeResult.split('\n').map((line, idx) => (
-                  <p key={idx} className={line.startsWith('#') ? 'font-bold text-indigo-900 dark:text-indigo-300 mt-2' : ''}>
-                    {line.replace(/^###\s*/, '').replace(/\*\*(.*?)\*\*/g, '$1')}
-                  </p>
-                ))}
+              <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed space-y-3 prose dark:prose-invert max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {reframeResult}
+                </ReactMarkdown>
               </div>
             </div>
           )}
@@ -358,77 +340,54 @@ export default function AIMentor({ onOpenResources }) {
         <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-6">
           <div className="flex items-center space-x-3 pb-4 border-b border-slate-100 dark:border-slate-700">
             <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 flex items-center justify-center font-bold">
-              <Compass className="w-5 h-5" />
+              <Eye className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-heading text-base font-bold text-slate-800 dark:text-slate-100">
                 5-4-3-2-1 Sensory Grounding Technique
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                A proven mindfulness tool to ease sudden panic, exam anxiety, or racing thoughts by connecting to your physical senses.
+                A proven mindfulness technique to pull your mind back into the present moment when experiencing high anxiety.
               </p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            {/* Step Progress Indicators */}
-            <div className="flex justify-between items-center px-2">
-              {groundingSteps.map((step, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setGroundingStep(idx)}
-                  className={`w-10 h-10 rounded-2xl font-bold text-xs flex items-center justify-center transition-all ${
-                    groundingStep === idx
-                      ? 'bg-emerald-600 text-white scale-110 shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
-                  }`}
-                >
-                  {step.num}
-                </button>
-              ))}
+          <div className="p-6 rounded-3xl border-2 transition-all space-y-4 bg-slate-50 dark:bg-slate-900/60 border-indigo-200 dark:border-indigo-800">
+            <div className="flex items-center justify-between">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                Step {groundingStep + 1} of {groundingSteps.length}
+              </span>
+              <span className="text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+                {groundingSteps[groundingStep].sense}
+              </span>
             </div>
 
-            {/* Active Step Card */}
-            <div className={`p-8 rounded-3xl border-2 transition-all space-y-4 ${groundingSteps[groundingStep].color}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-extrabold">{groundingSteps[groundingStep].num}</span>
-                <span className="text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-white/60 dark:bg-slate-900/60">
-                  {groundingSteps[groundingStep].sense}
-                </span>
-              </div>
-
-              <p className="text-base sm:text-lg font-bold leading-relaxed">
+            <div className="space-y-2 py-2">
+              <h4 className="font-heading text-lg font-bold text-slate-800 dark:text-slate-100">
+                Find {groundingSteps[groundingStep].num} Items
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                 {groundingSteps[groundingStep].prompt}
               </p>
+            </div>
 
-              <div className="pt-4 flex justify-between items-center">
-                <button
-                  disabled={groundingStep === 0}
-                  onClick={() => setGroundingStep((prev) => Math.max(0, prev - 1))}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-white/80 dark:bg-slate-900/80 disabled:opacity-40"
-                >
-                  ← Previous
-                </button>
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200/60 dark:border-slate-700/80">
+              <button
+                onClick={() => setGroundingStep(Math.max(0, groundingStep - 1))}
+                disabled={groundingStep === 0}
+                className="px-4 py-2 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-700 disabled:opacity-30 text-slate-600 dark:text-slate-300"
+              >
+                Previous Step
+              </button>
 
-                {groundingStep < groundingSteps.length - 1 ? (
-                  <button
-                    onClick={() => setGroundingStep((prev) => prev + 1)}
-                    className="px-6 py-2 rounded-xl bg-emerald-700 text-white text-xs font-bold shadow-xs hover:bg-emerald-800 transition-all"
-                  >
-                    Next Sense →
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setGroundingStep(0)}
-                    className="px-6 py-2 rounded-xl bg-emerald-800 text-white text-xs font-bold shadow-xs"
-                  >
-                    Finish Grounding ✨
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={() => setGroundingStep((groundingStep + 1) % groundingSteps.length)}
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition-all flex items-center space-x-1"
+              >
+                <span>{groundingStep === groundingSteps.length - 1 ? 'Start Over 🔄' : 'Next Sense →'}</span>
+              </button>
             </div>
           </div>
-
         </div>
       )}
 

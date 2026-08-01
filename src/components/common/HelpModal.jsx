@@ -18,10 +18,10 @@ export default function HelpModal({ isOpen, onClose, onOpenResources }) {
             </div>
             <div>
               <h3 className="font-heading text-base font-bold text-slate-800 dark:text-slate-100">
-                About MindHaven
+                About HealthHaven
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Safe, anonymous student mental health space
+                Safe, anonymous student mental & physical health space
               </p>
             </div>
           </div>
@@ -41,7 +41,7 @@ export default function HelpModal({ isOpen, onClose, onOpenResources }) {
               <span>100% Student Privacy & Safety</span>
             </div>
             <p className="leading-relaxed text-emerald-900/80 dark:text-emerald-200/80">
-              MindHaven is designed with a privacy-first mindset. You can log daily moods, ask for help on the Anonymous Peer Wall without disclosing your identity, and chat safely with MindPal AI.
+              HealthHaven is designed with a privacy-first mindset. You can log daily moods, monitor physical vitality, ask for help on the Anonymous Peer Wall without disclosing your identity, and chat safely with MindPal AI.
             </p>
           </div>
 
