@@ -20,6 +20,7 @@ import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../serv
 import { subscribeToMoodLogs, markDailyPathStepCompleted } from '../services/firestore.js';
 import { GroundingVagalDiagram } from '../components/wellness/VisualTutorialDiagrams.jsx';
 import PagePurposeHeader from '../components/common/PagePurposeHeader.jsx';
+import MarkdownRenderer from '../components/common/MarkdownRenderer.jsx';
 
 export default function AIMentor({ user, onOpenResources }) {
   const [activeTab, setActiveTab] = useState('chat'); // 'chat', 'reframer', 'grounding'
