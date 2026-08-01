@@ -1,98 +1,117 @@
 import {
+  db
+} from "../firebase.js";
+import {
   collection,
-  doc,
-  getDoc,
   addDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  orderBy,
-  setDoc,
+  doc,
   updateDoc,
   arrayUnion,
   increment,
-  serverTimestamp,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
 } from "firebase/firestore";
-import { db } from "../firebase.js";
 
-// Helper for local storage key management
-const LOCAL_STORAGE_MOODS = "mindhaven_mood_logs_v2";
-const LOCAL_STORAGE_POSTS = "mindhaven_anon_posts_v2";
-const LOCAL_STORAGE_GRATITUDE = "mindhaven_gratitude_logs_v2";
+const LOCAL_STORAGE_MOODS = "mindhaven_local_mood_logs";
+const LOCAL_STORAGE_POSTS = "mindhaven_local_anon_posts";
+const LOCAL_STORAGE_GRATITUDE = "mindhaven_local_gratitude";
+const LOCAL_STORAGE_TUTORIAL = "mindhaven_tutorial_completed";
 
-// Initial seed for Anonymous Posts if empty in local storage
-const INITIAL_ANON_POSTS = [];
-
-// ─── User Profile ────────────────────────────────────────────────────────────
-
-export async function syncUserProfile(user) {
-  if (!user || !db) return;
-  try {
-    const ref = doc(db, "users", user.uid, "profile", "data");
-    await setDoc(
-      ref,
+const INITIAL_ANON_POSTS = [
+  {
+    id: "post-1",
+    alias: "Quiet Breeze",
+    category: "Exam Stress",
+    content: "Midterms are coming up next week and I feel like I can barely catch my breath. Trying to take it one hour at a time.",
+    timestamp: new Date().toISOString(),
+    reactions: { support: 4, warmth: 2 },
+    comments: [
       {
-        displayName: user.displayName || "Anonymous Student",
-        email: user.email || null,
-        photoURL: user.photoURL || null,
-        lastSeen: serverTimestamp(),
+        id: "c-1",
+        authorAlias: "Peaceful Panda",
+        text: "You are not alone! Break your study sessions into 25min Pomodoro blocks. You've got this!",
+        timestamp: new Date().toISOString(),
       },
-      { merge: true },
-    );
-  } catch (err) {
-    console.warn("Profile sync fallback to offline mode:", err);
+    ],
+  },
+  {
+    id: "post-2",
+    alias: "Hopeful Ember",
+    category: "Burnout",
+    content: "Reminder to everyone reading this: your grades do not define your human worth. Take a slow deep breath.",
+    timestamp: new Date().toISOString(),
+    reactions: { support: 9, warmth: 5 },
+    comments: [],
+  },
+];
+
+// ─── Tutorial Status ─────────────────────────────────────────────────────────
+
+export function getLocalTutorialStatus() {
+  return localStorage.getItem(LOCAL_STORAGE_TUTORIAL) === "true";
+}
+
+export async function completeTutorialFlag(uid) {
+  localStorage.setItem(LOCAL_STORAGE_TUTORIAL, "true");
+  if (uid && db) {
+    try {
+      const userRef = doc(db, "users", uid);
+      await updateDoc(userRef, { tutorialCompleted: true });
+    } catch (err) {
+      console.warn("Firestore tutorial flag update error:", err);
+    }
   }
 }
 
 export async function checkTutorialStatus(uid) {
-  if (!uid) return true;
-  const localVal = localStorage.getItem("mindhaven_tutorial_completed_" + uid);
-  if (localVal === "true") return true;
-
-  if (db) {
-    try {
-      const ref = doc(db, "users", uid, "profile", "data");
-      const snap = await getDoc(ref);
-      if (snap.exists() && snap.data()?.hasCompletedTutorial) {
-        localStorage.setItem("mindhaven_tutorial_completed_" + uid, "true");
-        return true;
-      }
-    } catch (err) {
-      console.warn("Tutorial status fetch fallback:", err);
-    }
-  }
+  if (getLocalTutorialStatus()) return true;
   return false;
 }
 
-export async function completeTutorialFlag(uid) {
-  if (!uid) return;
-  localStorage.setItem("mindhaven_tutorial_completed_" + uid, "true");
-  if (db) {
+// ─── User Profile ─────────────────────────────────────────────────────────────
+
+export async function syncUserProfile(user) {
+  if (!user || !db) return;
+  try {
+    const userRef = doc(db, "users", user.uid);
+    await updateDoc(userRef, {
+      displayName: user.displayName || "Student Friend",
+      email: user.email,
+      lastLogin: serverTimestamp(),
+    });
+  } catch (err) {
+    // Document might not exist yet; try creating
     try {
-      const ref = doc(db, "users", uid, "profile", "data");
-      await setDoc(ref, { hasCompletedTutorial: true }, { merge: true });
-    } catch (err) {
-      console.warn("Complete tutorial flag sync error:", err);
+      const userRef = doc(db, "users", user.uid);
+      await addDoc(collection(db, "users"), {
+        uid: user.uid,
+        displayName: user.displayName || "Student Friend",
+        email: user.email,
+        createdAt: serverTimestamp(),
+      });
+    } catch (e) {
+      console.warn("Firestore syncUserProfile warning:", e);
     }
   }
 }
 
-// ─── Mood Tracker ─────────────────────────────────────────────────────────────
+// ─── Mood & Journal Logs ──────────────────────────────────────────────────────
 
 export async function saveMoodLog(uid, moodData) {
-  const newEntry = {
-    ...moodData,
-    createdAt: new Date().toISOString(),
-  };
-
-  // Local Storage Save
-  const existingLocal = JSON.parse(
+  const localLogs = JSON.parse(
     localStorage.getItem(LOCAL_STORAGE_MOODS) || "[]",
   );
-  const updatedLocal = [newEntry, ...existingLocal];
+  const newEntry = {
+    id: "mood-" + Date.now(),
+    ...moodData,
+    timestamp: new Date().toISOString(),
+  };
+
+  const updatedLocal = [newEntry, ...localLogs];
   localStorage.setItem(LOCAL_STORAGE_MOODS, JSON.stringify(updatedLocal));
 
-  // Firestore Save if user logged in
   if (uid && db) {
     try {
       const ref = collection(db, "users", uid, "moodLogs");
@@ -109,7 +128,6 @@ export async function saveMoodLog(uid, moodData) {
 }
 
 export function subscribeToMoodLogs(uid, onData) {
-  // Load local initial
   const localLogs = JSON.parse(
     localStorage.getItem(LOCAL_STORAGE_MOODS) || "[]",
   );
@@ -169,14 +187,11 @@ export function getLocalAnonymousPosts() {
 export async function createAnonymousPost(postData) {
   const newPost = {
     id: "post-" + Date.now(),
-    alias: postData.alias || "Serene Breeze 🌿",
-    avatarBg:
-      postData.avatarBg ||
-      "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300",
+    alias: postData.alias || "Quiet Breeze",
     category: postData.category || "General Venting",
     content: postData.content,
     timestamp: new Date().toISOString(),
-    reactions: { warmth: 0, support: 1, relatable: 0 },
+    reactions: { support: 1, warmth: 0 },
     comments: [],
   };
 
@@ -196,7 +211,7 @@ export async function createAnonymousPost(postData) {
     }
   }
 
-  return newPost;
+  return updated;
 }
 
 export function subscribeToAnonymousPosts(onData) {
@@ -234,36 +249,67 @@ export function subscribeToAnonymousPosts(onData) {
   }
 }
 
-export function togglePostReaction(postId, reactionType) {
+export async function togglePostReaction(postId, reactionType = "support") {
   const posts = getLocalAnonymousPosts();
   const index = posts.findIndex((p) => p.id === postId);
+
   if (index !== -1) {
-    const post = posts[index];
-    if (!post.reactions)
-      post.reactions = { warmth: 0, support: 0, relatable: 0 };
-    post.reactions[reactionType] = (post.reactions[reactionType] || 0) + 1;
+    const post = { ...posts[index] };
+    if (!post.reactions) post.reactions = { support: 0, warmth: 0 };
+    
+    // Support either 'support' or 'hearts' key
+    const targetKey = (reactionType === "hearts" || reactionType === "support") ? "support" : reactionType;
+    post.reactions[targetKey] = (post.reactions[targetKey] || 0) + 1;
     posts[index] = post;
+
     localStorage.setItem(LOCAL_STORAGE_POSTS, JSON.stringify(posts));
+
+    if (db && !postId.startsWith("post-")) {
+      try {
+        const postRef = doc(db, "anonymousPosts", postId);
+        await updateDoc(postRef, {
+          [`reactions.${targetKey}`]: increment(1)
+        });
+      } catch (err) {
+        console.warn("Firestore reaction update error:", err);
+      }
+    }
   }
-  return posts;
+  return [...posts];
 }
 
-export function addCommentToPost(postId, commentData) {
+export async function addCommentToPost(postId, commentData) {
   const posts = getLocalAnonymousPosts();
   const index = posts.findIndex((p) => p.id === postId);
+
   if (index !== -1) {
-    const post = posts[index];
+    const post = { ...posts[index] };
     if (!post.comments) post.comments = [];
-    post.comments.push({
+
+    const newComment = {
       id: "c-" + Date.now(),
-      alias: commentData.alias || "Kind Soul 🤍",
+      authorAlias: commentData.authorAlias || commentData.alias || "Kind Soul",
       text: commentData.text,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    post.comments = [...post.comments, newComment];
     posts[index] = post;
+
     localStorage.setItem(LOCAL_STORAGE_POSTS, JSON.stringify(posts));
+
+    if (db && !postId.startsWith("post-")) {
+      try {
+        const postRef = doc(db, "anonymousPosts", postId);
+        await updateDoc(postRef, {
+          comments: arrayUnion(newComment)
+        });
+      } catch (err) {
+        console.warn("Firestore comment update error:", err);
+      }
+    }
   }
-  return posts;
+  return [...posts];
 }
 
 // ─── Gratitude Journal ───────────────────────────────────────────────────────

@@ -47,7 +47,7 @@ export default function CrisisResources() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
       {/* Red Action Callout */}
-      <div id="tour-crisis-banner" className="bg-rose-900 text-white rounded-3xl p-6 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-rose-900 text-white rounded-3xl p-6 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-start space-x-3">
           <div className="w-10 h-10 rounded-2xl bg-rose-800 text-white flex items-center justify-center font-bold shrink-0">
             <ShieldAlert className="w-5 h-5 text-rose-300" />
@@ -125,6 +125,11 @@ export default function CrisisResources() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50">
+            <span className="font-bold text-stone-800 dark:text-stone-100 block">GIIS Healthline</span>
+            <p className="text-stone-500 mt-0.5">WhatsApp: +65 9723 4398 (Office Hours) (24/7 Lifeline)</p>
+          </div>
+
           <div className="p-3.5 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50">
             <span className="font-bold text-stone-800 dark:text-stone-100 block">NUS University Counseling Center</span>
             <p className="text-stone-500 mt-0.5">Hotline: +65 6516 2376 (24/7 Lifeline)</p>

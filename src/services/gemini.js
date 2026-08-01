@@ -11,7 +11,7 @@ if (API_KEY) {
 }
 
 // Valid models in Google Gemini API
-const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"];
+const MODELS = ["gemini-3.1-flash-lite", "gemini-1.5-flash", "gemini-2.0-flash"];
 
 // Preset Curated Affirmations Database (0 API Calls)
 const LOCAL_AFFIRMATIONS = {
