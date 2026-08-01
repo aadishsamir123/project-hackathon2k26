@@ -7,6 +7,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import AmbientSoundPlayer from '../components/common/AmbientSoundPlayer.jsx';
+import MicroMeditationCards from '../components/common/MicroMeditationCards.jsx';
 
 export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [breathingTechnique, setBreathingTechnique] = useState('478'); // '478', 'box', 'equal'
@@ -104,7 +105,7 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
     : 0;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
       
       {/* Header */}
       <div id="tour-serenity-header" className="flex items-center justify-between">
@@ -265,6 +266,9 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
         </div>
 
       </div>
+
+      {/* 🧘 MICRO-MEDITATION GUIDED AUDIO CARDS SECTION */}
+      <MicroMeditationCards />
 
     </div>
   );
