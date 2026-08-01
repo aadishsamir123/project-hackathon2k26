@@ -15,7 +15,7 @@ import {
   Zap,
   Shield
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import MarkdownRenderer from '../components/common/MarkdownRenderer.jsx';
 import { getEmpatheticCounselorResponse, reframeCognitiveThought } from '../services/gemini.js';
 import { GroundingVagalDiagram } from '../components/wellness/VisualTutorialDiagrams.jsx';
 
@@ -225,10 +225,8 @@ export default function AIMentor({ onOpenResources }) {
                       ? 'bg-[#FAF6EE] dark:bg-stone-900 text-stone-800 dark:text-stone-100 rounded-tl-xs border border-amber-200/50'
                       : 'bg-orange-600 text-white rounded-tr-xs'
                   }`}>
-                    <div className="prose dark:prose-invert max-w-none text-xs sm:text-sm leading-relaxed">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                        {msg.text}
-                      </ReactMarkdown>
+                    <div>
+                      <MarkdownRenderer content={msg.text} />
                     </div>
 
                     {msg.isCrisisMatch && (
@@ -344,10 +342,8 @@ export default function AIMentor({ onOpenResources }) {
                 <span>Reframed Cognitive Analysis</span>
               </h4>
 
-              <div className="text-xs sm:text-sm text-stone-700 dark:text-stone-200 leading-relaxed space-y-3 prose dark:prose-invert max-w-none">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {reframeResult}
-                </ReactMarkdown>
+              <div>
+                <MarkdownRenderer content={reframeResult} />
               </div>
             </div>
           )}
