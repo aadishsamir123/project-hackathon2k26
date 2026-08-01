@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Wind,
   Play,
   Pause,
   RotateCcw,
-  Sparkles,
-  Volume2,
-  BookOpen,
-  Heart,
   CheckCircle2
 } from 'lucide-react';
 import AmbientSoundPlayer from '../components/common/AmbientSoundPlayer.jsx';
@@ -15,55 +11,82 @@ import AmbientSoundPlayer from '../components/common/AmbientSoundPlayer.jsx';
 export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
   const [breathingTechnique, setBreathingTechnique] = useState('478'); // '478', 'box', 'equal'
   const [isBreathingActive, setIsBreathingActive] = useState(false);
-  const [breathingPhase, setBreathingPhase] = useState('Ready'); // 'Inhale', 'Hold', 'Exhale'
+  const [breathingPhase, setBreathingPhase] = useState('Ready'); // 'Inhale', 'Hold', 'Exhale', 'Ready'
   const [timerSeconds, setTimerSeconds] = useState(0);
+  const [maxPhaseSeconds, setMaxPhaseSeconds] = useState(4);
   const [completedCycles, setCompletedCycles] = useState(0);
 
+  const phaseRef = useRef('Inhale');
+  const elapsedRef = useRef(0);
+
   const techniques = {
-    '478': { name: 'Relaxing Breath (4-7-8)', desc: 'Inhale 4s, Hold 7s, Exhale 8s for deep nervous system calm', inhale: 4, hold: 7, exhale: 8 },
-    'box': { name: 'Box Breathing (4-4)', desc: 'Inhale 4s, Hold 4s, Exhale 4s. Used by Navy SEALs & athletes to regain focus under pressure', inhale: 4, hold: 4, exhale: 4 },
-    'equal': { name: 'Equal Calm (5-5)', desc: 'Balanced 5s Inhale, 5s Exhale for smooth heart rate variability', inhale: 5, hold: 0, exhale: 5 },
+    '478': { name: '4-7-8 Relaxing Breath', desc: 'Inhale 4s, Hold 7s, Exhale 8s for nervous system calm', inhale: 4, hold: 7, exhale: 8 },
+    'box': { name: 'Box Breathing (4-4)', desc: 'Inhale 4s, Hold 4s, Exhale 4s for focus under pressure', inhale: 4, hold: 4, exhale: 4 },
+    'equal': { name: 'Equal Calm (5-5)', desc: 'Balanced 5s Inhale, 5s Exhale for heart rate harmony', inhale: 5, hold: 0, exhale: 5 },
+  };
+
+  const phaseInstructions = {
+    Inhale: 'Inhale deeply through your nose',
+    Hold: 'Hold gently and relax your shoulders',
+    Exhale: 'Exhale slowly through your mouth',
+    Ready: 'Tap the circle to begin session'
   };
 
   useEffect(() => {
     let interval = null;
     if (isBreathingActive) {
       const config = techniques[breathingTechnique];
-      let currentPhase = 'Inhale';
-      let sec = config.inhale;
-
-      setBreathingPhase(currentPhase);
-      setTimerSeconds(sec);
+      phaseRef.current = 'Inhale';
+      elapsedRef.current = 0;
+      setBreathingPhase('Inhale');
+      setMaxPhaseSeconds(config.inhale);
+      setTimerSeconds(config.inhale);
 
       interval = setInterval(() => {
-        setTimerSeconds((prev) => {
-          if (prev > 1) return prev - 1;
+        const currentConfig = techniques[breathingTechnique];
+        const currentMax = phaseRef.current === 'Inhale'
+          ? currentConfig.inhale
+          : phaseRef.current === 'Hold'
+            ? currentConfig.hold
+            : currentConfig.exhale;
 
-          // Transition phase
-          if (currentPhase === 'Inhale') {
-            if (config.hold > 0) {
-              currentPhase = 'Hold';
-              sec = config.hold;
+        elapsedRef.current += 1;
+
+        if (elapsedRef.current > currentMax) {
+          if (phaseRef.current === 'Inhale') {
+            if (currentConfig.hold > 0) {
+              phaseRef.current = 'Hold';
+              setMaxPhaseSeconds(currentConfig.hold);
             } else {
-              currentPhase = 'Exhale';
-              sec = config.exhale;
+              phaseRef.current = 'Exhale';
+              setMaxPhaseSeconds(currentConfig.exhale);
             }
-          } else if (currentPhase === 'Hold') {
-            currentPhase = 'Exhale';
-            sec = config.exhale;
-          } else if (currentPhase === 'Exhale') {
-            currentPhase = 'Inhale';
-            sec = config.inhale;
+          } else if (phaseRef.current === 'Hold') {
+            phaseRef.current = 'Exhale';
+            setMaxPhaseSeconds(currentConfig.exhale);
+          } else if (phaseRef.current === 'Exhale') {
+            phaseRef.current = 'Inhale';
+            setMaxPhaseSeconds(currentConfig.inhale);
             setCompletedCycles((c) => c + 1);
           }
 
-          setBreathingPhase(currentPhase);
-          return sec;
-        });
+          elapsedRef.current = 0;
+          setBreathingPhase(phaseRef.current);
+          setTimerSeconds(
+            phaseRef.current === 'Inhale'
+              ? currentConfig.inhale
+              : phaseRef.current === 'Hold'
+                ? currentConfig.hold
+                : currentConfig.exhale
+          );
+        } else {
+          setTimerSeconds(currentMax - elapsedRef.current);
+        }
       }, 1000);
     } else {
       setBreathingPhase('Ready');
       setTimerSeconds(0);
+      elapsedRef.current = 0;
     }
     return () => clearInterval(interval);
   }, [isBreathingActive, breathingTechnique]);
@@ -72,59 +95,38 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
     setIsBreathingActive(false);
     setBreathingPhase('Ready');
     setTimerSeconds(0);
+    elapsedRef.current = 0;
     setCompletedCycles(0);
   };
 
+  const progressPercent = maxPhaseSeconds > 0
+    ? (elapsedRef.current / maxPhaseSeconds) * 100
+    : 0;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       
-      {/* Header Banner */}
-      <div id="tour-serenity-header" className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Header */}
+      <div id="tour-serenity-header" className="flex items-center justify-between">
         <div>
-          <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-              Mindfulness & De-stressing Suite
-            </span>
-          </div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight mt-1">
-            Serenity Corner 🌿🧘
+          <span className="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wider">
+            Serenity
+          </span>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-stone-100">
+            Breathing & Stillness
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-            Practice visual guided breathing, reset your nervous system, and immerse in relaxing ambient soundscapes.
-          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Left Column: Visual Breathing Exercise (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-700/80 shadow-xs space-y-6 flex flex-col justify-between">
+        {/* Left: Breathing Orb Container */}
+        <div className="lg:col-span-7 bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 border border-amber-200/60 dark:border-stone-800 shadow-xs space-y-6 flex flex-col justify-between">
           
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700">
-            <div className="flex items-center space-x-2.5">
-              <div className="w-9 h-9 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 flex items-center justify-center font-bold">
-                <Wind className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-heading text-base font-bold text-slate-800 dark:text-slate-100">
-                  Guided Breathing Visualizer
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Follow the expanding circle to slow down your pulse
-                </p>
-              </div>
-            </div>
-
-            <span className="px-3 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold border border-emerald-200 dark:border-emerald-800">
-              {completedCycles} Cycles Completed
-            </span>
-          </div>
-
-          {/* Technique Selectors */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* Technique Selector */}
+          <div className="grid grid-cols-3 gap-2">
             {Object.keys(techniques).map((key) => {
-              const tech = techniques[key];
-              const isSelected = breathingTechnique === key;
+              const isSel = breathingTechnique === key;
               return (
                 <button
                   key={key}
@@ -132,97 +134,138 @@ export default function SerenityCorner({ isAudioPlaying, onToggleAudio }) {
                     setBreathingTechnique(key);
                     handleResetBreathing();
                   }}
-                  className={`p-3 rounded-2xl border text-left space-y-1 transition-all ${
-                    isSelected
-                      ? 'bg-emerald-500 text-white border-emerald-600 shadow-md font-bold'
-                      : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
+                  className={`p-3 rounded-2xl text-left transition-all ${
+                    isSel
+                      ? 'bg-amber-100 dark:bg-amber-950/80 border border-orange-400 text-stone-900 dark:text-stone-100 font-bold'
+                      : 'bg-[#FAF6EE] dark:bg-stone-800 border border-amber-200/50 text-stone-600 dark:text-stone-300 hover:bg-amber-50'
                   }`}
                 >
-                  <p className="text-xs font-bold">{tech.name}</p>
-                  <p className={`text-[10px] line-clamp-5 ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>
-                    {tech.desc}
+                  <p className="text-xs font-bold">{techniques[key].name}</p>
+                  <p className="text-[10px] text-stone-400 mt-0.5 line-clamp-1">
+                    {key === '478' ? '4-7-8' : key === 'box' ? '4-4' : '5-5'} rhythm
                   </p>
                 </button>
               );
             })}
           </div>
 
-          {/* Animated Visual Circle Container */}
-          <div className="py-10 flex flex-col items-center justify-center relative min-h-[280px]">
-            
-            {/* Pulsing expanding circle */}
+          {/* 🔘 THE INTERACTIVE BREATHING ORB BUTTON (Clickable Orb) */}
+          <div className="flex flex-col items-center justify-center py-4 space-y-5">
             <div
-              className={`w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-emerald-400 via-teal-400 to-indigo-400 flex flex-col items-center justify-center text-white shadow-2xl transition-all duration-1000 ${
-                isBreathingActive && breathingPhase === 'Inhale'
-                  ? 'scale-125 opacity-100 shadow-emerald-500/50'
-                  : isBreathingActive && breathingPhase === 'Hold'
-                  ? 'scale-125 opacity-90 shadow-indigo-500/50'
-                  : isBreathingActive && breathingPhase === 'Exhale'
-                  ? 'scale-90 opacity-70 shadow-slate-500/30'
-                  : 'scale-100 opacity-80'
-              }`}
+              onClick={() => setIsBreathingActive(!isBreathingActive)}
+              className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center cursor-pointer group select-none"
+              title={isBreathingActive ? 'Tap to Pause' : 'Tap to Start Breathing'}
             >
-              <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-100 drop-shadow-xs">
-                {breathingPhase}
-              </span>
-              <span className="text-4xl font-extrabold my-1 font-mono">
-                {timerSeconds > 0 ? timerSeconds : '–'}
-              </span>
-              <span className="text-[10px] text-white/80 font-medium">
-                {isBreathingActive ? 'Breathe with rhythm' : 'Press Start'}
-              </span>
+              
+              {/* Outer Ambient Glow Aura */}
+              <div className={`absolute inset-0 rounded-full transition-all duration-1000 ${
+                breathingPhase === 'Inhale'
+                  ? 'scale-125 bg-orange-500/25 blur-2xl opacity-100'
+                  : breathingPhase === 'Hold'
+                    ? 'scale-125 bg-amber-500/30 blur-2xl animate-pulse-soft'
+                    : breathingPhase === 'Exhale'
+                      ? 'scale-85 bg-orange-500/10 blur-xl opacity-40'
+                      : 'scale-95 bg-amber-400/10 blur-lg group-hover:scale-105'
+              }`} />
+
+              {/* Rotating Concentric Dash Ring */}
+              <div className={`absolute w-56 h-56 sm:w-64 sm:h-64 rounded-full border-2 border-dashed border-orange-400/30 dark:border-orange-500/20 transition-all duration-1000 ${
+                isBreathingActive ? 'animate-spin-slow' : ''
+              }`} />
+
+              {/* SVG Circular Progress Arc */}
+              <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="44"
+                  className="stroke-amber-200/40 dark:stroke-stone-800 fill-none"
+                  strokeWidth="2.5"
+                />
+                {isBreathingActive && (
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="44"
+                    className="stroke-orange-500 fill-none transition-all duration-1000 ease-linear"
+                    strokeWidth="3.5"
+                    strokeDasharray="276.46"
+                    strokeDashoffset={Math.max(0, 276.46 - (276.46 * Math.min(100, progressPercent)) / 100)}
+                    strokeLinecap="round"
+                  />
+                )}
+              </svg>
+
+              {/* Central Orb Button */}
+              <div className={`w-40 h-40 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 text-white flex flex-col items-center justify-center shadow-xl transition-all duration-1000 cubic-bezier(0.4,0,0.2,1) z-10 group-hover:scale-105 ${
+                breathingPhase === 'Inhale'
+                  ? 'scale-125 shadow-orange-500/50'
+                  : breathingPhase === 'Hold'
+                    ? 'scale-125 shadow-amber-500/40 animate-pulse-soft'
+                    : breathingPhase === 'Exhale'
+                      ? 'scale-85 opacity-85'
+                      : 'scale-100 shadow-orange-500/20'
+              }`}>
+                {isBreathingActive ? (
+                  <>
+                    <span className="text-xs font-bold uppercase tracking-widest text-amber-100">
+                      {breathingPhase}
+                    </span>
+                    <span className="text-4xl font-extrabold mt-0.5 font-mono">
+                      {timerSeconds}s
+                    </span>
+                    <span className="text-[10px] opacity-80 mt-1 flex items-center space-x-1">
+                      <Pause className="w-3 h-3 inline" />
+                      <span>Tap to Pause</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-8 h-8 text-white ml-1 fill-white" />
+                    <span className="text-xs font-bold uppercase tracking-wider mt-2">
+                      Start
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Micro Guidance Prompt */}
+            <p className="text-xs text-stone-600 dark:text-stone-300 font-medium text-center">
+              {phaseInstructions[breathingPhase] || phaseInstructions.Ready}
+            </p>
+
+            {/* Cycle Count & Reset */}
+            <div className="flex items-center space-x-4 pt-2">
+              <div className="flex items-center space-x-1.5 text-xs text-stone-500">
+                <CheckCircle2 className="w-4 h-4 text-orange-600" />
+                <span>Completed: <strong className="text-orange-700 dark:text-orange-300">{completedCycles} cycles</strong></span>
+              </div>
+
+              <button
+                onClick={handleResetBreathing}
+                className="p-2 rounded-xl text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-amber-100/60 transition-all text-xs flex items-center space-x-1"
+                title="Reset counter"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Reset</span>
+              </button>
             </div>
 
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center justify-center space-x-3 pt-2">
-            <button
-              onClick={() => setIsBreathingActive(!isBreathingActive)}
-              className={`px-8 py-3 rounded-2xl text-xs font-extrabold text-white shadow-md transition-all flex items-center space-x-2 ${
-                isBreathingActive
-                  ? 'bg-amber-600 hover:bg-amber-700 shadow-amber-600/20'
-                  : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'
-              }`}
-            >
-              {isBreathingActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              <span>{isBreathingActive ? 'Pause Session' : 'Start Breathing'}</span>
-            </button>
-
-            <button
-              onClick={handleResetBreathing}
-              className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-900 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all"
-              title="Reset timer"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-          </div>
-
         </div>
 
-        {/* Right Column: Soundscape Generator Studio (5 cols) */}
+        {/* Right: Soundscapes */}
         <div className="lg:col-span-5 space-y-6">
-          
           <AmbientSoundPlayer
             isPlaying={isAudioPlaying}
             onTogglePlay={onToggleAudio}
           />
-
-          <div className="bg-gradient-to-br from-emerald-50/80 via-teal-50/60 to-indigo-50/80 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-indigo-950/40 rounded-3xl p-6 border border-emerald-100 dark:border-slate-800 shadow-xs space-y-3">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
-              <h4 className="font-heading text-xs font-bold text-slate-800 dark:text-slate-100">
-                Why Breathing & Soundscapes Help Students
-              </h4>
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Slowing your breath to 6 cycles per minute triggers the parasympathetic nervous system, lowering cortisol (stress hormone) and restoring calm focus during intense study sessions.
-            </p>
-          </div>
-
         </div>
 
       </div>
+
     </div>
   );
 }

@@ -1,125 +1,117 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Compass,
   ChevronRight,
   ChevronLeft,
   X,
-  Sparkles,
-  Heart,
-  Activity,
-  Wind,
-  ShieldCheck,
-  MessageSquareHeart
+  Sparkles
 } from 'lucide-react';
+import { completeTutorialFlag } from '../../services/firestore.js';
 
-export default function GuidedTourOverlay({ isOpen, onClose, onComplete }) {
+export default function GuidedTourOverlay({ isOpen, user, onClose }) {
+  // If tour is not active, return null immediately so nothing renders in DOM
+  if (!isOpen) return null;
+
   const [currentStep, setCurrentStep] = useState(0);
+  const [targetRect, setTargetRect] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   const tourSteps = [
     {
       path: '/dashboard/myspace/homehub',
-      targetId: 'tour-home-hub',
-      badge: 'Step 1 of 6 · Home Sanctuary',
-      title: 'Welcome to Your Home Hub 🌿',
-      icon: Heart,
-      color: 'from-emerald-500 to-teal-500',
-      description: 'Your central hub for tracking daily emotions, recording quick feelings, and building your Happiness Jar collection.',
-      highlight: 'Notice your weekly happiness index and daily affirmation at the top.'
+      targetId: 'tour-mindful-path',
+      stepNum: '1 / 7',
+      title: 'Mindful Sanctuary Path',
+      text: 'Explore your daily 6-step path for emotional tracking, body rest, and care.'
+    },
+    {
+      path: '/dashboard/myspace/emotionlog',
+      targetId: 'tour-emotion-entry',
+      stepNum: '2 / 7',
+      title: 'Private Reflection Journal',
+      text: 'Log your feelings, intensity score, and context tags privately.'
     },
     {
       path: '/dashboard/myspace/physical',
-      targetId: 'tour-physical-header',
-      badge: 'Step 2 of 6 · Physical Vitality',
-      title: 'Physical Wellbeing & Movement ⚡',
-      icon: Activity,
-      color: 'from-sky-500 to-indigo-500',
-      description: 'Physical health powers emotional health! Track hydration, sleep quality, 20-20-20 eye rest breaks, and guided desk stretches.',
-      highlight: 'Use the 1-click hydration tracker and study stretch guides.'
-    },
-    {
-      path: '/dashboard/calmandai/mindpal',
-      targetId: 'tour-mindpal-header',
-      badge: 'Step 3 of 6 · MindPal AI Companion',
-      title: 'Empathetic AI & CBT Reframer 🤖',
-      icon: Compass,
-      color: 'from-purple-500 to-pink-500',
-      description: 'Talk with MindPal AI for empathetic support, practice CBT thought reframing, or follow 5-4-3-2-1 sensory grounding.',
-      highlight: 'Your conversations are private and protected by strict model quota rules.'
+      targetId: 'tour-hydration-card',
+      stepNum: '3 / 7',
+      title: 'Body Vitality & Hydration',
+      text: 'Log daily water glasses, track sleep quality, and take 20-20-20 eye breaks.'
     },
     {
       path: '/dashboard/calmandai/serenity',
       targetId: 'tour-serenity-header',
-      badge: 'Step 4 of 6 · Serenity Corner',
-      title: 'Breathing Exercises & Soundscapes 🌬️',
-      icon: Wind,
-      color: 'from-teal-500 to-emerald-500',
-      description: 'Relax with animated 4-7-8 breathing exercises and browser-synthesized ambient rain and ocean soundscapes.',
-      highlight: 'Click the ambient audio toggle in the top bar anytime to play calm audio.'
+      stepNum: '4 / 7',
+      title: 'Guided Breathing Orb',
+      text: 'Tap the glowing central orb directly to start 4-7-8 or Equal Calm breathing.'
+    },
+    {
+      path: '/dashboard/calmandai/mindpal',
+      targetId: 'tour-mindpal-header',
+      stepNum: '5 / 7',
+      title: 'MindPal AI Companion',
+      text: 'Chat with an empathetic listener or reframe anxious thoughts into clear insights.'
     },
     {
       path: '/dashboard/connect/peerhaven',
-      targetId: 'tour-peerhaven-header',
-      badge: 'Step 5 of 6 · Peer Support',
-      title: 'Peer Haven Anonymous Wall 🤝',
-      icon: MessageSquareHeart,
-      color: 'from-indigo-500 to-purple-500',
-      description: 'Share experiences and offer warm encouragement to fellow students completely anonymously.',
-      highlight: 'Post a supportive note or send a warm reaction.'
+      targetId: 'tour-peer-wall',
+      stepNum: '6 / 7',
+      title: 'Peer Haven Support Wall',
+      text: 'Read and post 100% anonymous support messages with fellow students.'
     },
     {
       path: '/dashboard/connect/resources',
-      targetId: 'tour-crisis-header',
-      badge: 'Step 6 of 6 · Help & Crisis',
-      title: '24/7 Safety & Hotlines 📞',
-      icon: ShieldCheck,
-      color: 'from-amber-500 to-rose-500',
-      description: 'Access 24/7 professional hotlines (988, 1767 SOS) and your step-by-step Personal Safety Plan whenever needed.',
-      highlight: 'Always available from the top safety banner.'
+      targetId: 'tour-crisis-banner',
+      stepNum: '7 / 7',
+      title: '24/7 Immediate Crisis Lines',
+      text: 'Instant access to free, confidential SOS 1767 and student emergency hotlines.'
     }
   ];
 
-  const step = tourSteps[currentStep];
+  const activeStep = tourSteps[currentStep] || tourSteps[0];
 
-  // Navigate to current step path when step changes
+  // Navigate to step path if location differs
   useEffect(() => {
-    if (isOpen && step && location.pathname !== step.path) {
-      navigate(step.path);
+    if (location.pathname !== activeStep.path) {
+      navigate(activeStep.path);
     }
-  }, [isOpen, currentStep, step, navigate, location.pathname]);
+  }, [currentStep, activeStep.path]);
 
-  // Scroll target element into view and apply highlight outline
+  // Track target element bounding rectangle
   useEffect(() => {
-    if (!isOpen || !step) return;
-
-    const timer = setTimeout(() => {
-      const el = document.getElementById(step.targetId);
+    const updatePosition = () => {
+      const el = document.getElementById(activeStep.targetId);
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('ring-4', 'ring-emerald-500/80', 'ring-offset-4', 'transition-all', 'duration-500');
-      }
-    }, 200);
-
-    return () => {
-      clearTimeout(timer);
-      const el = document.getElementById(step.targetId);
-      if (el) {
-        el.classList.remove('ring-4', 'ring-emerald-500/80', 'ring-offset-4');
+        const rect = el.getBoundingClientRect();
+        setTargetRect({
+          top: rect.top,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height
+        });
+      } else {
+        setTargetRect(null);
       }
     };
-  }, [isOpen, currentStep, step]);
 
-  if (!isOpen) return null;
+    updatePosition();
+    const timeout = setTimeout(updatePosition, 300);
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
 
-  const Icon = step.icon;
+    return () => {
+      clearTimeout(timeout);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [currentStep, location.pathname, activeStep.targetId]);
 
   const handleNext = () => {
     if (currentStep < tourSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      onComplete();
+      handleFinish();
     }
   };
 
@@ -129,89 +121,106 @@ export default function GuidedTourOverlay({ isOpen, onClose, onComplete }) {
     }
   };
 
+  const handleFinish = async () => {
+    try {
+      if (user?.uid) {
+        await completeTutorialFlag(user.uid);
+      }
+    } catch (e) {
+      console.warn("Complete tutorial flag warning:", e);
+    } finally {
+      if (onClose) onClose();
+      navigate('/dashboard/myspace/homehub');
+    }
+  };
+
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-4 animate-slideUp">
-      <div className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-700/90 rounded-3xl shadow-2xl p-5 space-y-4 ring-1 ring-slate-900/5">
-        
-        {/* Step Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700/80">
-          <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
-              {step.badge}
+    <div className="fixed inset-0 z-[99999] pointer-events-none">
+      
+      {/* Target Element Glowing Orange Spotlight Ring */}
+      {targetRect && (
+        <div
+          className="fixed transition-all duration-500 rounded-3xl border-2 border-orange-500 ring-4 ring-orange-500/40 shadow-[0_0_35px_rgba(234,88,12,0.45)] pointer-events-none animate-pulse-soft"
+          style={{
+            top: `${Math.max(10, targetRect.top - 8)}px`,
+            left: `${Math.max(10, targetRect.left - 8)}px`,
+            width: `${targetRect.width + 16}px`,
+            height: `${targetRect.height + 16}px`
+          }}
+        />
+      )}
+
+      {/* Floating Spotlight Popover Tooltip */}
+      <div
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto z-[99999] transition-all duration-300 w-[92vw] max-w-sm"
+        style={
+          targetRect && window.innerWidth >= 640
+            ? {
+                top: `${Math.min(window.innerHeight - 220, Math.max(80, targetRect.top + targetRect.height + 16))}px`,
+                left: `${Math.min(window.innerWidth - 380, Math.max(20, targetRect.left))}px`,
+                transform: 'none'
+              }
+            : {}
+        }
+      >
+        <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-5 border border-amber-200/80 dark:border-stone-700 shadow-2xl space-y-3">
+          
+          {/* Header & Close */}
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-orange-700 dark:text-orange-300">
+              {activeStep.stepNum}
             </span>
+
+            <button
+              onClick={handleFinish}
+              className="p-1 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-amber-100/60 transition-all text-xs"
+              title="Close Tour"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-xs font-bold flex items-center space-x-1"
-          >
-            <span>Skip Tour</span>
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Content Card */}
-        <div className="flex items-start space-x-3.5">
-          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${step.color} text-white flex items-center justify-center shadow-md shrink-0 mt-0.5`}>
-            <Icon className="w-6 h-6" />
-          </div>
-
+          {/* Body */}
           <div className="space-y-1">
-            <h3 className="font-heading text-base font-bold text-slate-800 dark:text-slate-100">
-              {step.title}
-            </h3>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              {step.description}
-            </p>
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold pt-1">
-              ✨ {step.highlight}
+            <h4 className="font-heading text-sm font-bold text-stone-900 dark:text-stone-100 flex items-center space-x-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-orange-600" />
+              <span>{activeStep.title}</span>
+            </h4>
+            <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+              {activeStep.text}
             </p>
           </div>
-        </div>
 
-        {/* Progress Bar & Buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-700/80">
-          {/* Progress dots */}
-          <div className="flex items-center space-x-1.5">
-            {tourSteps.map((_, idx) => (
-              <div
-                key={idx}
-                onClick={() => setCurrentStep(idx)}
-                className={`h-2 rounded-full cursor-pointer transition-all duration-300 ${
-                  idx === currentStep
-                    ? 'w-6 bg-emerald-500'
-                    : 'w-2 bg-slate-200 dark:bg-slate-700'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-2">
+          {/* Footer Controls */}
+          <div className="flex items-center justify-between pt-2 border-t border-amber-200/50 dark:border-stone-800">
             <button
               onClick={handleBack}
               disabled={currentStep === 0}
-              className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all flex items-center space-x-1 ${
-                currentStep === 0
-                  ? 'opacity-30 cursor-not-allowed border-slate-200 dark:border-slate-700 text-slate-400'
-                  : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-              }`}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold disabled:opacity-30 text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 flex items-center space-x-1"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
               <span>Back</span>
             </button>
 
             <button
-              onClick={handleNext}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md shadow-emerald-600/20 flex items-center space-x-1.5"
+              onClick={handleFinish}
+              className="px-3 py-1.5 rounded-xl text-stone-500 hover:text-stone-800 text-xs font-semibold"
             >
-              <span>{currentStep === tourSteps.length - 1 ? 'Finish Tour 🌿' : 'Next Page'}</span>
+              Skip
+            </button>
+
+            <button
+              onClick={handleNext}
+              className="px-4 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition-all shadow-xs flex items-center space-x-1"
+            >
+              <span>{currentStep === tourSteps.length - 1 ? 'Finish' : 'Next'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
 
+        </div>
       </div>
+
     </div>
   );
 }

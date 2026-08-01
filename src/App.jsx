@@ -149,13 +149,13 @@ export default function App() {
                   </Routes>
                 </main>
 
-                {/* Subtle Footer */}
-                <footer className="bg-white/50 dark:bg-slate-900/50 border-t border-slate-200/60 dark:border-slate-800 py-6 px-4 text-center text-xs text-slate-400">
+                {/* Warm Serene Footer */}
+                <footer className="bg-[#FFFDF9]/60 dark:bg-[#262220]/60 border-t border-amber-200/60 dark:border-stone-800 py-6 px-4 text-center text-xs text-stone-500 dark:text-stone-400">
                   <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <span>HealthHaven</span>
+                    <span className="font-heading font-bold text-stone-700 dark:text-stone-300">HealthHaven Sanctuary</span>
                     <div className="flex items-center space-x-4">
-                      <button onClick={() => setIsHelpOpen(true)} className="hover:underline">About & FAQ</button>
-                      <button onClick={() => navigate('/dashboard/connect/resources')} className="hover:underline text-rose-500 font-semibold">Crisis Hotlines</button>
+                      <button onClick={() => setIsHelpOpen(true)} className="hover:text-stone-800 dark:hover:text-stone-200 hover:underline">About & Guide</button>
+                      <button onClick={() => navigate('/dashboard/connect/resources')} className="hover:underline text-rose-600 dark:text-rose-400 font-bold">24/7 Crisis Care</button>
                     </div>
                   </div>
                 </footer>

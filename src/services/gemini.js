@@ -10,7 +10,8 @@ if (API_KEY) {
   }
 }
 
-const FLASH_MODEL = "gemini-3.5-flash-lite";
+// Valid models in Google Gemini API
+const MODELS = ["gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.0-flash"];
 
 // Preset Curated Affirmations Database (0 API Calls)
 const LOCAL_AFFIRMATIONS = {
@@ -45,7 +46,6 @@ const LOCAL_AFFIRMATIONS = {
 
 /**
  * 1. Empathetic AI Student Counselor
- * Always calls Google Gemini API (gemini-3.5-flash-lite)
  */
 export async function getEmpatheticCounselorResponse(
   userMessage,
@@ -57,30 +57,32 @@ export async function getEmpatheticCounselorResponse(
   }
 
   if (ai) {
-    try {
-      const prompt = `You are MindPal, a warm, compassionate AI mental health companion for students strictly using model ${FLASH_MODEL}. 
+    for (const modelName of MODELS) {
+      try {
+        const prompt = `You are MindPal, a warm, compassionate AI mental health companion for students. 
 Keep response under 140 words, non-clinical, encouraging, concise markdown format.
 Student Message: "${userMessage}"`;
 
-      const response = await ai.models.generateContent({
-        model: FLASH_MODEL,
-        contents: prompt,
-      });
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: prompt,
+        });
 
-      if (response && response.text) {
-        return response.text;
+        if (response && response.text) {
+          return response.text;
+        }
+      } catch (error) {
+        console.warn(`Gemini API call error (${modelName}):`, error);
       }
-    } catch (error) {
-      console.warn("Gemini API call error:", error);
     }
   }
 
-  // Graceful network fallback if API key or connection drops
+  // Instant empathetic response fallback if API is unconfigured or unreachable
   return "I hear you, and what you're feeling is valid. Take a slow, deep breath in and out. I'm right here with you. How can I best support you in this moment?";
 }
 
 /**
- * 2. CBT Thought Reframer (Always uses Gemini AI gemini-3.5-flash-lite)
+ * 2. CBT Thought Reframer
  */
 export async function reframeCognitiveThought(negativeThought) {
   if (!negativeThought || !negativeThought.trim()) {
@@ -88,12 +90,13 @@ export async function reframeCognitiveThought(negativeThought) {
   }
 
   if (ai) {
-    try {
-      const prompt = `You are an expert Cognitive Behavioral Therapy (CBT) counselor for university & college students.
+    for (const modelName of MODELS) {
+      try {
+        const prompt = `You are an expert Cognitive Behavioral Therapy (CBT) counselor for university & college students.
 Analyze and reframe the following anxious/negative student thought:
 "${negativeThought}"
 
-Respond strictly using model ${FLASH_MODEL} formatted in markdown with these exact headings:
+Respond formatted in markdown with these exact headings:
 
 ### Identified Cognitive Distortion
 (Name the distortion e.g., Catastrophizing, All-or-Nothing Thinking, Emotional Reasoning, Overgeneralization, or Personalization, and briefly explain why).
@@ -109,16 +112,17 @@ Respond strictly using model ${FLASH_MODEL} formatted in markdown with these exa
 ### Micro Action Step
 (1 tiny, manageable action step the student can take right now to reset).`;
 
-      const response = await ai.models.generateContent({
-        model: FLASH_MODEL,
-        contents: prompt,
-      });
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: prompt,
+        });
 
-      if (response && response.text) {
-        return response.text;
+        if (response && response.text) {
+          return response.text;
+        }
+      } catch (error) {
+        console.warn(`Gemini CBT Reframer API call error (${modelName}):`, error);
       }
-    } catch (error) {
-      console.warn("Gemini CBT Reframer API call error:", error);
     }
   }
 
