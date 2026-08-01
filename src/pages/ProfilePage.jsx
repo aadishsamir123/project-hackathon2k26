@@ -58,6 +58,59 @@ export default function ProfilePage({ user }) {
     ? (moodLogs.reduce((acc, curr) => acc + (curr.intensity || 5), 0) / totalEntries).toFixed(1)
     : '7.5';
 
+  const calculateStreak = (logs) => {
+    if (!logs || logs.length === 0) return 0;
+    
+    const logDates = Array.from(new Set(
+      logs.map(log => {
+        const dateStr = log.createdAt || log.timestamp;
+        if (!dateStr) return null;
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) 
+          ? null 
+          : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      }).filter(Boolean)
+    )).sort((a, b) => new Date(b) - new Date(a));
+
+    if (logDates.length === 0) return 0;
+
+    const todayObj = new Date();
+    const todayStr = `${todayObj.getFullYear()}-${String(todayObj.getMonth() + 1).padStart(2, '0')}-${String(todayObj.getDate()).padStart(2, '0')}`;
+    
+    const yesterdayObj = new Date();
+    yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+    const yesterdayStr = `${yesterdayObj.getFullYear()}-${String(yesterdayObj.getMonth() + 1).padStart(2, '0')}-${String(yesterdayObj.getDate()).padStart(2, '0')}`;
+
+    const hasToday = logDates.includes(todayStr);
+    const hasYesterday = logDates.includes(yesterdayStr);
+
+    if (!hasToday && !hasYesterday) return 0;
+
+    let streak = 0;
+    let currentDate = hasToday ? todayObj : yesterdayObj;
+
+    while (true) {
+      const checkStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+      if (logDates.includes(checkStr)) {
+        streak += 1;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const currentStreak = calculateStreak(moodLogs);
+
+  const getStreakLevelBadge = (streak) => {
+    if (streak === 0) return 'Starting Fresh 🌱 (Log today to begin!)';
+    if (streak <= 2) return 'Mindful Beginner ⚡';
+    if (streak <= 5) return 'Consistent Contributor 🔥';
+    if (streak <= 9) return 'Sanctuary Seeker 🛡️';
+    return 'Zen Master 🧘';
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       
@@ -257,7 +310,12 @@ export default function ProfilePage({ user }) {
 
             <div className="p-3 rounded-2xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50 text-xs text-stone-700 dark:text-stone-300 flex items-center space-x-2">
               <ShieldCheck className="w-4 h-4 text-orange-600 shrink-0" />
-              <span>Streak Status: <strong className="text-orange-700 dark:text-orange-300">Consistent Contributor 🔥</strong></span>
+              <span>
+                Streak Status:{' '}
+                <strong className="text-orange-700 dark:text-orange-300">
+                  {currentStreak} Day{currentStreak === 1 ? '' : 's'} ({getStreakLevelBadge(currentStreak)})
+                </strong>
+              </span>
             </div>
           </div>
 
