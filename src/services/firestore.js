@@ -102,22 +102,46 @@ export async function setUserDebugFlag(uid, debugValue = true) {
   }
 }
 
+const pendingUserProfileSyncs = new Map();
+
 export async function syncUserProfile(user) {
-  if (!user || !db) return;
-  try {
-    const userRef = doc(db, "users", user.uid);
-    await setDoc(
-      userRef,
-      {
-        uid: user.uid,
+  if (!user?.uid || !db) return;
+
+  const uid = user.uid;
+  if (pendingUserProfileSyncs.has(uid)) {
+    return pendingUserProfileSyncs.get(uid);
+  }
+
+  const syncPromise = (async () => {
+    try {
+      const userRef = doc(db, "users", uid);
+      const existingDoc = await getDoc(userRef);
+
+      const profileData = {
+        uid,
         displayName: user.displayName || "Student Friend",
-        email: user.email,
+        email: user.email || null,
         lastLogin: serverTimestamp(),
-      },
-      { merge: true }
-    );
-  } catch (err) {
-    console.warn("Firestore syncUserProfile error:", err);
+      };
+
+      if (!existingDoc.exists()) {
+        await setDoc(userRef, {
+          ...profileData,
+          createdAt: serverTimestamp(),
+        });
+      } else {
+        await updateDoc(userRef, profileData);
+      }
+    } catch (err) {
+      console.warn("Firestore syncUserProfile error:", err);
+    }
+  })();
+
+  pendingUserProfileSyncs.set(uid, syncPromise);
+  try {
+    await syncPromise;
+  } finally {
+    pendingUserProfileSyncs.delete(uid);
   }
 }
 
