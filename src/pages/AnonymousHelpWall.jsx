@@ -27,16 +27,8 @@ export default function AnonymousHelpWall({ user }) {
   const [isPosting, setIsPosting] = useState(false);
   const [postContent, setPostContent] = useState('');
   const [postCategory, setPostCategory] = useState('Exam Stress');
-  const [postAlias, setPostAlias] = useState('Quiet Breeze');
   const [replyTextMap, setReplyTextMap] = useState({});
   const [expandedCommentsMap, setExpandedCommentsMap] = useState({});
-
-  const presetAliases = [
-    { name: 'Quiet Breeze', bg: 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200' },
-    { name: 'Mindful Panda', bg: 'bg-orange-100 text-orange-900 dark:bg-orange-950 dark:text-orange-200' },
-    { name: 'Gentle Cloud', bg: 'bg-[#FAF6EE] text-stone-800 dark:bg-stone-800 dark:text-stone-200' },
-    { name: 'Hopeful Ember', bg: 'bg-amber-200 text-amber-950 dark:bg-amber-900 dark:text-amber-100' },
-  ];
 
   const categories = [
     'All', 'Exam Stress', 'Loneliness', 'Burnout', 'Friendship', 'Career & Future', 'General Venting'
@@ -55,7 +47,7 @@ export default function AnonymousHelpWall({ user }) {
 
     setIsPosting(true);
     const updated = await createAnonymousPost({
-      alias: postAlias,
+      alias: 'Anonymous',
       category: postCategory,
       content: postContent.trim(),
       authorUid: user?.uid
@@ -79,7 +71,7 @@ export default function AnonymousHelpWall({ user }) {
     if (!text || !text.trim()) return;
 
     const updated = await addCommentToPost(postId, {
-      authorAlias: postAlias || 'Student Friend',
+      authorAlias: 'Anonymous',
       text: text.trim()
     });
     if (updated && Array.isArray(updated)) {
@@ -117,28 +109,7 @@ export default function AnonymousHelpWall({ user }) {
 
           <form onSubmit={handleCreatePost} className="space-y-4">
             
-            {/* Alias Selector */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-stone-700 dark:text-stone-300">
-                Choose Anonymous Alias:
-              </label>
-              <div className="grid grid-cols-2 gap-1.5">
-                {presetAliases.map((a) => (
-                  <button
-                    key={a.name}
-                    type="button"
-                    onClick={() => setPostAlias(a.name)}
-                    className={`p-2 rounded-xl text-xs font-medium text-left transition-all ${
-                      postAlias === a.name
-                        ? 'ring-2 ring-orange-500 font-bold bg-amber-100 dark:bg-amber-950 text-amber-950 dark:text-amber-200'
-                        : 'bg-[#FAF6EE] dark:bg-stone-800 border border-amber-200/50 text-stone-600 dark:text-stone-300'
-                    }`}
-                  >
-                    {a.name}
-                  </button>
-                ))}
-              </div>
-            </div>
+
 
             {/* Category Selector */}
             <div className="space-y-1.5">
@@ -220,7 +191,7 @@ export default function AnonymousHelpWall({ user }) {
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-950 dark:text-amber-200">
-                        {p.alias || 'Quiet Breeze'}
+                        Anonymous
                       </span>
                       <span className="text-[10px] text-stone-400 font-medium">
                         {p.category}
@@ -263,7 +234,7 @@ export default function AnonymousHelpWall({ user }) {
                           commentsList.map((c, idx) => (
                             <div key={idx} className="p-2.5 rounded-xl bg-[#FAF6EE] dark:bg-stone-900 border border-amber-200/50 dark:border-stone-800 text-xs space-y-0.5">
                               <span className="font-bold text-orange-700 dark:text-orange-300 text-[11px] block">
-                                {c.authorAlias || c.alias || 'Student Friend'}
+                                Anonymous
                               </span>
                               <p className="text-stone-700 dark:text-stone-300 leading-relaxed">{c.text}</p>
                             </div>

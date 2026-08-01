@@ -26,7 +26,7 @@ const LOCAL_STORAGE_TUTORIAL = "mindhaven_tutorial_completed";
 const INITIAL_ANON_POSTS = [
   {
     id: "post-1",
-    alias: "Quiet Breeze",
+    alias: "Anonymous",
     category: "Exam Stress",
     content: "Midterms are coming up next week and I feel like I can barely catch my breath. Trying to take it one hour at a time.",
     timestamp: new Date().toISOString(),
@@ -34,7 +34,7 @@ const INITIAL_ANON_POSTS = [
     comments: [
       {
         id: "c-1",
-        authorAlias: "Peaceful Panda",
+        authorAlias: "Anonymous",
         text: "You are not alone! Break your study sessions into 25min Pomodoro blocks. You've got this!",
         timestamp: new Date().toISOString(),
       },
@@ -42,7 +42,7 @@ const INITIAL_ANON_POSTS = [
   },
   {
     id: "post-2",
-    alias: "Hopeful Ember",
+    alias: "Anonymous",
     category: "Burnout",
     content: "Reminder to everyone reading this: your grades do not define your human worth. Take a slow deep breath.",
     timestamp: new Date().toISOString(),
@@ -267,7 +267,7 @@ export function getLocalAnonymousPosts() {
 export async function createAnonymousPost(postData) {
   const newPost = {
     id: "post-" + Date.now(),
-    alias: postData.alias || "Quiet Breeze",
+    alias: "Anonymous",
     category: postData.category || "General Venting",
     content: postData.content,
     timestamp: new Date().toISOString(),
@@ -368,7 +368,7 @@ export async function addCommentToPost(postId, commentData) {
 
     const newComment = {
       id: "c-" + Date.now(),
-      authorAlias: commentData.authorAlias || commentData.alias || "Kind Soul",
+      authorAlias: "Anonymous",
       text: commentData.text,
       timestamp: new Date().toISOString(),
     };
