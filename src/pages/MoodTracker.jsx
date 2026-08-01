@@ -15,11 +15,6 @@ import {
   Heart
 } from 'lucide-react';
 import { saveMoodLog, subscribeToMoodLogs } from '../services/firestore.js';
-import {
-  GroundingVagalDiagram,
-  PMRProtocolDiagram,
-  BoxBreathingDiagram
-} from '../components/wellness/VisualTutorialDiagrams.jsx';
 
 export default function MoodTracker({ user }) {
   const [moodLogs, setMoodLogs] = useState([]);
@@ -31,7 +26,6 @@ export default function MoodTracker({ user }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [filterTag, setFilterTag] = useState('All');
-  const [selectedToolkit, setSelectedToolkit] = useState('grounding');
 
   const emotionsList = [
     { name: 'Joyful', emoji: '✨', defaultRating: 9 },
@@ -297,66 +291,6 @@ export default function MoodTracker({ user }) {
 
         </div>
 
-      </div>
-
-      {/* 📓 JOURNAL GUIDELINE PRACTICE TOOLKITS SECTION */}
-      <div className="bg-[#FFFDF9] dark:bg-[#262220] rounded-3xl p-6 sm:p-8 border border-amber-200/70 dark:border-stone-800 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-amber-200/60 dark:border-stone-800">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-950 text-orange-700 dark:text-orange-300 flex items-center justify-center font-bold">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-heading text-base font-bold text-stone-800 dark:text-stone-100">
-                Active Reflection & Grounding Toolkits
-              </h3>
-              <p className="text-xs text-stone-500 dark:text-stone-400">
-                Interactive practices integrated directly from the Anti-Anxiety Notebook, Wreck This Journal, and Five Minute Journal.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-1.5 bg-[#FAF6EE] dark:bg-stone-900 p-1.5 rounded-2xl border border-amber-200/60 dark:border-stone-800 overflow-x-auto">
-            <button
-              onClick={() => setSelectedToolkit('grounding')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                selectedToolkit === 'grounding'
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
-              }`}
-            >
-              5-4-3-2-1 Sensory
-            </button>
-
-            <button
-              onClick={() => setSelectedToolkit('pmr')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                selectedToolkit === 'pmr'
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
-              }`}
-            >
-              PMR Muscle Release
-            </button>
-
-            <button
-              onClick={() => setSelectedToolkit('breathing')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold shrink-0 transition-all ${
-                selectedToolkit === 'breathing'
-                  ? 'bg-orange-600 text-white shadow-xs'
-                  : 'text-stone-600 dark:text-stone-300 hover:bg-amber-100/60 dark:hover:bg-stone-800'
-              }`}
-            >
-              Box Breathing 4-4
-            </button>
-          </div>
-        </div>
-
-        <div>
-          {selectedToolkit === 'grounding' && <GroundingVagalDiagram />}
-          {selectedToolkit === 'pmr' && <PMRProtocolDiagram />}
-          {selectedToolkit === 'breathing' && <BoxBreathingDiagram />}
-        </div>
       </div>
 
     </div>
